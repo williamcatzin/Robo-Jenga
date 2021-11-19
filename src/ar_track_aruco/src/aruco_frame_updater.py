@@ -7,13 +7,17 @@
 #Import the rospy package. For an import to work, it must be specified
 #in both the package manifest AND the Python file in which it is used.
 import rospy
+import tf2_py
 import tf2_ros
+import tf2_msgs.msg
 import sys
 import numpy as np
 import cv2
 import cv2.aruco as aruco
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
+import geometry_msgs
+from scipy.spatial.transform import Rotation as R
 
 CAMERA_MATRIX = np.array([[406.167596765, 0.0, 649.310826191], 
                           [0.0, 406.167596765, 412.393413372], 
@@ -25,6 +29,14 @@ CAMERA_TOPIC = "/cameras/left_hand_camera/image"
 
 IMAGE_MSG_TYPE = Image
 
+FRAME_TOPIC = "/tf"
+
+FRAME_MSG_TYPE = tf2_msgs.msg.TFMessage
+
+CAMERA_FRAME = "left_hand_camera"
+
+TAG_FRAME = "aruco_tag_{}"
+
 class frame_updater:
 
     def __init__(self):
@@ -32,6 +44,7 @@ class frame_updater:
         self.distortion_coeffs = DISTORTION_COEFFS #TODO: change to params
 
         self.image_pub = rospy.Publisher("/cvimage", Image, queue_size=10) #TODO: get from params
+        self.frame_pub = rospy.Publisher(FRAME_TOPIC, FRAME_MSG_TYPE, queue_size=10)
 
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(CAMERA_TOPIC, IMAGE_MSG_TYPE, self.callback) #TODO: get from params
@@ -54,15 +67,34 @@ class frame_updater:
                 for i in range(len(ids)):
                     id = ids[i]
                     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], 0.02, self.camera_matrix, self.distortion_coeffs)
-                    rot_matrix = np.empty((3,3))
-                    cv2.Rodrigues(rvec, dst=rot_matrix)
-                    print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\nRMAT:\n{}\n".format(id, tvec, rvec, rot_matrix))
-                    aruco.drawDetectedMarkers(frame, corners)  # Draw A square around the markers
-                    aruco.drawAxis(frame, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
-                    # Display the resulting frame
-            
-            #cv2.imshow('frame', frame)
-            topic_image = self.bridge.cv2_to_imgmsg(frame)
+                    #print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
+                    aruco.drawDetectedMarkers(gray, corners)  # Draw A square around the markers
+                    aruco.drawAxis(gray, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
+                    
+                    tvec = np.array([tvec[0][0][0], tvec[0][0][1], tvec[0][0][2]])
+                    rvec = np.array([rvec[0][0][0], rvec[0][0][1], rvec[0][0][2]])
+
+                    r = R.from_rotvec(rvec)
+                    q = r.as_quat()
+                    
+                    t = geometry_msgs.msg.TransformStamped()
+                    t.header.frame_id = CAMERA_FRAME
+                    t.header.stamp = rospy.Time.now()
+                    t.child_frame_id = TAG_FRAME.format(id)
+                    t.transform.translation.x = tvec[0]
+                    t.transform.translation.y = tvec[1]
+                    t.transform.translation.z = tvec[2]
+
+                    t.transform.rotation.x = q[0]
+                    t.transform.rotation.y = q[1]
+                    t.transform.rotation.z = q[2]
+                    t.transform.rotation.w = q[3]
+
+
+                    tfm = tf2_msgs.msg.TFMessage([t])
+                    self.frame_pub.publish(tfm)
+
+            topic_image = self.bridge.cv2_to_imgmsg(gray)
             self.image_pub.publish(topic_image)
 
         except CvBridgeError as e:

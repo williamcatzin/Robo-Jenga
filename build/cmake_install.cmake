@@ -128,6 +128,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/gtest/cmake_install.cmake")
   include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/ar_track_alvar/ar_track_alvar_msgs/cmake_install.cmake")
   include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/ar_test/cmake_install.cmake")
+  include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/ar_track_aruco/cmake_install.cmake")
   include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/ar_track_alvar/ar_track_alvar/cmake_install.cmake")
   include("/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/baxter_cam/cmake_install.cmake")
 

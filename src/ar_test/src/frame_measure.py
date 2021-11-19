@@ -9,11 +9,12 @@
 import rospy
 import tf2_ros
 import sys
+import math
 
 from geometry_msgs.msg import Twist
 
 #Define the method which contains the main functionality of the node.
-def controller(curr_frame, goal_frame):
+def measure(frame1, frame2):
   """
   Controls a turtlebot whose position is denoted by turtlebot_frame,
   to go to a position denoted by target_frame
@@ -35,19 +36,18 @@ def controller(curr_frame, goal_frame):
   # Loop until the node is killed with Ctrl-C
   while not rospy.is_shutdown():
     try:
-      trans = tfBuffer.lookup_transform(curr_frame, goal_frame, rospy.Time())
+      trans = tfBuffer.lookup_transform(frame1, frame2, rospy.Time())
 
-      print(trans)
+      #print(trans)
+      print(math.sqrt(trans.transform.translation.x**2 + trans.transform.translation.y**2 + trans.transform.translation.z**2))
 
     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
       pass
     # Use our rate object to sleep until it is time to publish again
     r.sleep()
 
-      
-# This is Python's sytax for a main() method, which is run by default
-# when exectued in the shell
-if __name__ == '__main__':
+
+def main():
   # Check if the node has received a signal to shut down
   # If not, run the talker method
 
@@ -56,6 +56,19 @@ if __name__ == '__main__':
   rospy.init_node('ar_test', anonymous=True)
 
   try:
-    controller(sys.argv[1], sys.argv[2])
+    if not rospy.has_param("~frame/1"):
+        return False
+    frame1 = rospy.get_param("~frame/1")
+    if not rospy.has_param("~frame/2"):
+        return False
+    frame2 = rospy.get_param("~frame/2")
+
+    measure(frame1, frame2)
   except rospy.ROSInterruptException:
     pass
+
+      
+# This is Python's sytax for a main() method, which is run by default
+# when exectued in the shell
+if __name__ == '__main__':
+  main()

@@ -311,6 +311,12 @@ ar_track_alvar_msgs_DIR:PATH=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspace
 ar_track_alvar_msgs_SOURCE_DIR:STATIC=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/src/ar_track_alvar/ar_track_alvar_msgs
 
 //Value Computed by CMake
+ar_track_aruco_BINARY_DIR:STATIC=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/ar_track_aruco
+
+//Value Computed by CMake
+ar_track_aruco_SOURCE_DIR:STATIC=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/src/ar_track_aruco
+
+//Value Computed by CMake
 baxter_cam_BINARY_DIR:STATIC=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/build/baxter_cam
 
 //Value Computed by CMake
@@ -354,6 +360,9 @@ cv_bridge_DIR:PATH=/opt/ros/kinetic/share/cv_bridge/cmake
 
 //The directory containing a CMake configuration file for dynamic_reconfigure.
 dynamic_reconfigure_DIR:PATH=/opt/ros/kinetic/share/dynamic_reconfigure/cmake
+
+//The directory containing a CMake configuration file for fiducial_msgs.
+fiducial_msgs_DIR:PATH=fiducial_msgs_DIR-NOTFOUND
 
 //The directory containing a CMake configuration file for gencpp.
 gencpp_DIR:PATH=/opt/ros/kinetic/share/gencpp/cmake
@@ -667,7 +676,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=7
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

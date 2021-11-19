@@ -7,5 +7,6 @@
 subdirs(gtest)
 subdirs(ar_track_alvar/ar_track_alvar_msgs)
 subdirs(ar_test)
+subdirs(ar_track_aruco)
 subdirs(ar_track_alvar/ar_track_alvar)
 subdirs(baxter_cam)

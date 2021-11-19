@@ -1,0 +1,16 @@
+<launch>
+
+  <arg name="frame1" default="left_hand_camera_axis" />
+  <arg name="frame2" default="ar_marker_0" />
+
+  <!-- Mapper node. -->
+  <node name="frame_measure"
+        pkg="ar_test"
+        type="frame_measure.py"
+        output="screen">
+
+    <param name="frame/1" value="$(arg frame1)" />
+    <param name="frame/2" value="$(arg frame2)" />
+
+  </node>
+</launch>
