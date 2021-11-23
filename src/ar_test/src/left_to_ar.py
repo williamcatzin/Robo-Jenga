@@ -9,9 +9,10 @@
 import rospy
 import tf2_ros
 import sys
-import math
-
-from geometry_msgs.msg import Twist
+from path_planner import PathPlanner
+from moveit_msgs.msg import OrientationConstraint
+from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import TransformStamped
 
 #Define the method which contains the main functionality of the node.
 def measure(frame1, frame2):
@@ -36,10 +37,52 @@ def measure(frame1, frame2):
   # Loop until the node is killed with Ctrl-C
   while not rospy.is_shutdown():
     try:
+      # Get the transform between the left camera and the target ar marker
       trans = tfBuffer.lookup_transform(frame1, frame2, rospy.Time())
+      # Build Path Planner Object
+      planner = PathPlanner("left_arm")
 
-      #print(trans)
-      print(math.sqrt(trans.transform.translation.x**2 + trans.transform.translation.y**2 + trans.transform.translation.z**2))
+      # Create a path constraint for the arm
+      # UNCOMMENT FOR THE ORIENTATION CONSTRAINTS PART
+      orien_const = OrientationConstraint()
+      orien_const.link_name = "left_gripper"
+      orien_const.header.frame_id = "base"
+      orien_const.orientation.y = -1.0
+      orien_const.absolute_x_axis_tolerance = 0.1
+      orien_const.absolute_y_axis_tolerance = 0.1
+      orien_const.absolute_z_axis_tolerance = 0.1
+      orien_const.weight = 1.0
+
+      while not rospy.is_shutdown():
+
+        while not rospy.is_shutdown():
+            try:
+                x, y, z = 0.47, -0.85, 0.07
+                goal_1 = PoseStamped()
+                goal_1.header.frame_id = "base"
+
+                #x, y, and z position
+                goal_1.pose.position.x = x
+                goal_1.pose.position.y = y
+                goal_1.pose.position.z = z
+
+                #Orientation as a quaternion
+                goal_1.pose.orientation.x = 0.0
+                goal_1.pose.orientation.y = -1.0
+                goal_1.pose.orientation.z = 0.0
+                goal_1.pose.orientation.w = 0.0
+
+                # Might have to edit this . . . 
+                plan = planner.plan_to_pose(goal_1, [orien_const])
+
+                raw_input("Press <Enter> to move the right arm to goal pose 1: ")
+                if not controller.execute_path(plan):
+                    raise Exception("Execution failed")
+            except Exception as e:
+                print e
+                traceback.print_exc()
+            else:
+                break
 
     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
       pass

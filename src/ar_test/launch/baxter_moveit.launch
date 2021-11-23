@@ -1,0 +1,13 @@
+<launch>
+  <!-- This is the main moveit launch file, which launches all the planning functionality.
+  Note that we disable execution, since the fake execution doens't work anyways -->
+  <include file="$(find baxter_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="false"/>
+    <arg name="fake_execution" value="true"/>
+  </include>
+
+  <include file="$(find baxter_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+  </include>
+
+</launch>

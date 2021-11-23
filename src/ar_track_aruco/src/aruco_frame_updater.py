@@ -51,14 +51,36 @@ class frame_updater:
 
     def callback(self,image_msg):
         try:
-            #print("{}, {}".format(image_msg.height, image_msg.width))
-            frame = np.array(self.bridge.imgmsg_to_cv2(image_msg, "bgr8"))
-            #print(frame.shape)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Change grayscale
+            # Convert ROS image to CV image
+            cv_image = self.bridge.imgmsg_to_cv2(image_msg, "bgr8")
+            # Change from RGB to HSV (Hue, Saturation, Value)
+            cv_grayImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+
+            # Lower bound on gray scale
+            # lower_gray = np.array([0, 5, 50])
+            # Upper bound on gray scale
+            # upper_gray = np.array([179, 50, 255])
+
+            # the bounds above are producing an error with converting the image
+            # to gray scale in cv
+
+            
+
+            # Filter image using desired gray scale
+            # mask = cv2.inRange(hsv, lower_gray, upper_gray)
+            # Mask cv_image with filter to get only paper with ar marker
+            # masked = cv2.bitwise_and(cv_image, cv_image, mask=mask)
+
+            # cv2.imshow("window", cv_grayImage)
+            # cv2.waitKey(3)
+
+
+
+
             aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)  # Use 4X4 dictionary to find markers
             detector_parameters = aruco.DetectorParameters_create()  # Marker detection parameters
             # lists of ids and the corners beloning to each id
-            corners, ids, rejected_img_points = aruco.detectMarkers(gray, aruco_dict,
+            corners, ids, rejected_img_points = aruco.detectMarkers(cv_grayImage, aruco_dict,
                                                                 parameters=detector_parameters,
                                                                 cameraMatrix=self.camera_matrix,
                                                                 distCoeff=self.distortion_coeffs)
@@ -68,8 +90,8 @@ class frame_updater:
                     id = ids[i]
                     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], 0.02, self.camera_matrix, self.distortion_coeffs)
                     #print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
-                    aruco.drawDetectedMarkers(gray, corners)  # Draw A square around the markers
-                    aruco.drawAxis(gray, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
+                    aruco.drawDetectedMarkers(cv_grayImage, corners)  # Draw A square around the markers
+                    aruco.drawAxis(cv_grayImage, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
                     
                     tvec = np.array([tvec[0][0][0], tvec[0][0][1], tvec[0][0][2]])
                     rvec = np.array([rvec[0][0][0], rvec[0][0][1], rvec[0][0][2]])
@@ -94,7 +116,7 @@ class frame_updater:
                     tfm = tf2_msgs.msg.TFMessage([t])
                     self.frame_pub.publish(tfm)
 
-            topic_image = self.bridge.cv2_to_imgmsg(gray)
+            topic_image = self.bridge.cv2_to_imgmsg(cv_grayImage)
             self.image_pub.publish(topic_image)
 
         except CvBridgeError as e:
