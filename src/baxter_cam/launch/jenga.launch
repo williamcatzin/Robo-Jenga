@@ -1,0 +1,18 @@
+<launch>
+  <arg name="parent_frame_id" default="left_hand_camera_axis" />
+  <arg name="child_frame_id" default="aruco_tag_[0]" />
+
+    <include file="$(find baxter_cam)/launch/ar_track_left_hand.launch">
+        <!-- <arg name="frame1" value="left_hand_camera_axis" />  -->
+    </include>
+
+    <node name="frame_measure"
+        pkg="ar_test"
+        type="left_cam_to_ar.py"
+        output="screen">
+
+    <param name="frame/1" value="$(arg parent_frame_id)" />
+    <param name="frame/2" value="$(arg child_frame_id)" />
+  </node>
+
+</launch>

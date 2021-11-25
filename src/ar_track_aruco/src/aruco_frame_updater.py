@@ -89,7 +89,7 @@ class frame_updater:
                 for i in range(len(ids)):
                     id = ids[i]
                     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], 0.02, self.camera_matrix, self.distortion_coeffs)
-                    #print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
+                    print("FRAME-UPDATE:  TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
                     aruco.drawDetectedMarkers(cv_grayImage, corners)  # Draw A square around the markers
                     aruco.drawAxis(cv_grayImage, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
                     

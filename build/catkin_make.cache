@@ -1,2 +1,2 @@
-ar_test:ar_track_alvar/ar_track_alvar:ar_track_alvar/ar_track_alvar_msgs:ar_track_aruco:baxter_cam
+ar_test:ar_track_aruco:baxter_cam
 -DCATKIN_DEVEL_PREFIX=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/devel -DCMAKE_INSTALL_PREFIX=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/install -G Unix Makefiles

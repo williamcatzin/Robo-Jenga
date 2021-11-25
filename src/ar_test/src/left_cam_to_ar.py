@@ -13,6 +13,7 @@ from path_planner import PathPlanner
 from moveit_msgs.msg import OrientationConstraint
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import TransformStamped
+import traceback
 
 #Define the method which contains the main functionality of the node.
 def measure(frame1, frame2):
@@ -38,7 +39,7 @@ def measure(frame1, frame2):
   while not rospy.is_shutdown():
     try:
       # Get the transform between the left camera and the target ar marker
-      trans = tfBuffer.lookup_transform(frame1, frame2, rospy.Time())
+      goal = tfBuffer.lookup_transform(frame1, frame2, rospy.Time())
       # Build Path Planner Object
       planner = PathPlanner("left_arm")
 
@@ -57,29 +58,14 @@ def measure(frame1, frame2):
 
         while not rospy.is_shutdown():
             try:
-                x, y, z = 0.47, -0.85, 0.07
-                goal_1 = PoseStamped()
-                goal_1.header.frame_id = "base"
-
-                #x, y, and z position
-                goal_1.pose.position.x = x
-                goal_1.pose.position.y = y
-                goal_1.pose.position.z = z
-
-                #Orientation as a quaternion
-                goal_1.pose.orientation.x = 0.0
-                goal_1.pose.orientation.y = -1.0
-                goal_1.pose.orientation.z = 0.0
-                goal_1.pose.orientation.w = 0.0
-
                 # Might have to edit this . . . 
-                plan = planner.plan_to_pose(goal_1, [orien_const])
+                plan = planner.plan_to_pose(goal, [orien_const])
 
-                raw_input("Press <Enter> to move the right arm to goal pose 1: ")
-                if not controller.execute_path(plan):
+                raw_input("Press <Enter> to move the left end-effector to the target: ")
+                if not planner.execute_path(plan):
                     raise Exception("Execution failed")
             except Exception as e:
-                print e
+                print(e)
                 traceback.print_exc()
             else:
                 break
@@ -96,7 +82,7 @@ def main():
 
   #Run this program as a new node in the ROS computation graph 
   #called /turtlebot_controller.
-  rospy.init_node('ar_test', anonymous=True)
+  rospy.init_node('ar_test')
 
   try:
     if not rospy.has_param("~frame/1"):
