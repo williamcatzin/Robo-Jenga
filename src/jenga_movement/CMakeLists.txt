@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(baxter_cam)
+project(jenga_movement)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -14,7 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_msgs
   roscpp
   rospy
+  sesnsor_msgs
   std_msgs
+  tf2
   tf2_ros
 )
 
@@ -75,7 +77,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   moveit_msgs#   std_msgs
+#   geometry_msgs#   moveit_msgs#   sesnsor_msgs#   std_msgs
 # )
 
 ################################################
@@ -109,8 +111,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES baxter_cam
-#  CATKIN_DEPENDS baxter_tools geometry_msgs intera_interface moveit_msgs roscpp rospy std_msgs tf2_ros
+#  LIBRARIES jenga_movement
+#  CATKIN_DEPENDS baxter_tools geometry_msgs intera_interface moveit_msgs roscpp rospy sesnsor_msgs std_msgs tf2 tf2_ros
 #  DEPENDS system_lib
 )
 
@@ -127,7 +129,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/baxter_cam.cpp
+#   src/${PROJECT_NAME}/jenga_movement.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -138,7 +140,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/baxter_cam_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/jenga_movement_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -202,7 +204,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_baxter_cam.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_jenga_movement.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

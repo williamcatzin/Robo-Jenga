@@ -16,8 +16,10 @@ from sensor_msgs.msg import Image
 from aruco_frame_updater import frame_updater
 
 def main(args):
+    topic_name = args[1]
+    frame = args[2] 
     rospy.init_node('ar_track_aruco', anonymous=True)
-    fu = frame_updater()
+    fu = frame_updater(topic_name, frame)
     try:
         rospy.spin()
     except KeyboardInterrupt:
@@ -25,4 +27,5 @@ def main(args):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
+    # sys.argv contains camera topics
     main(sys.argv)

@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- Mapper node. -->
+  <node name="frame_align"
+        pkg="ar_test"
+        type="frame_align.py"
+        output="screen"
+        args="">
+
+  </node>
+</launch>
