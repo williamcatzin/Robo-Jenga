@@ -1,8 +1,0 @@
-prefix=/home/cc/ee106a/fl21/class/ee106a-adl/ros_workspaces/Robo-Jenga/devel
-
-Name: baxter_cam
-Description: Description of baxter_cam
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
