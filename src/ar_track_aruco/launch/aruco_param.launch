@@ -4,7 +4,7 @@
   <arg right_hand="/cameras/right_hand_camera/image" default= "/cameras/right_hand_camera/image" /> -->
 
   <!-- parameters for ar_track_aruco.py  -->
-  <node name="ar_track_left" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/left_hand_camera/image left_hand_camera"/>
-  <node name="ar_track_right" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/right_hand_camera/image right_hand_camera"/>
+  <node name="ar_track_left" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/left_hand_camera/image left_hand_camera 0.0113"/>
+  <node name="ar_track_right" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/right_hand_camera/image right_hand_camera 0.0113"/>
 
 </launch>

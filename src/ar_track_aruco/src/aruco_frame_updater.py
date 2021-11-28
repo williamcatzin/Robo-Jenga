@@ -25,37 +25,29 @@ CAMERA_MATRIX = np.array([[406.167596765, 0.0, 649.310826191],
 
 DISTORTION_COEFFS = np.array([0.0194573814166, -0.0580583678532, 0.00267653694509, 0.000415440329517, 0.0159403471267])
 
-# Topic name to subscribe to baxter camera
-CAMERA_TOPIC = ""
-
-IMAGE_MSG_TYPE = Image
-
 # Topic name to publish
 FRAME_TOPIC = "/tf"
 
 FRAME_MSG_TYPE = tf2_msgs.msg.TFMessage
 
-# Parent frame id
-CAMERA_FRAME = ""
-
 TAG_FRAME = "aruco_tag_{}"
 
 class frame_updater:
 
-    def __init__(self, topic_name, frame):
+    def __init__(self, topic_name, frame, ar_marker_size):
         self.camera_matrix = CAMERA_MATRIX
         self.distortion_coeffs = DISTORTION_COEFFS
-        
+        self.ar_size = ar_marker_size
         self.camera_topic = topic_name
         self.camera_frame = frame
         print("Topic: ", topic_name)
         print("Frame: ", frame)
 
-        self.image_pub = rospy.Publisher("/cvimage", Image, queue_size=10) #TODO: get from params
+        self.image_pub = rospy.Publisher("/cvimage", Image, queue_size=10)
         self.frame_pub = rospy.Publisher(FRAME_TOPIC, FRAME_MSG_TYPE, queue_size=10)
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber(self.camera_topic, IMAGE_MSG_TYPE, self.callback) #TODO: get from params
+        self.image_sub = rospy.Subscriber(self.camera_topic, Image, self.callback)
 
     def callback(self,image_msg):
         try:
@@ -74,7 +66,7 @@ class frame_updater:
             if np.all(ids is not None):
                 for i in range(len(ids)):
                     id = ids[i]
-                    rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], 0.02, self.camera_matrix, self.distortion_coeffs)
+                    rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], self.ar_size, self.camera_matrix, self.distortion_coeffs)
                     #print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
                     aruco.drawDetectedMarkers(gray, corners)  # Draw A square around the markers
                     aruco.drawAxis(gray, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
