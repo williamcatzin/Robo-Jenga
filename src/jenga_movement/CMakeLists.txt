@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_msgs
   roscpp
   rospy
-  sesnsor_msgs
+  sensor_msgs
   std_msgs
   tf2
   tf2_ros
