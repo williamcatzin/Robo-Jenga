@@ -40,10 +40,10 @@ class frame_updater:
         self.ar_size = ar_marker_size
         self.camera_topic = topic_name
         self.camera_frame = frame
-        print("Topic: ", topic_name)
-        print("Frame: ", frame)
+        print("Topic: {}".format(topic_name))
+        print("Frame: {}".format(frame))
 
-        self.image_pub = rospy.Publisher("/cvimage", Image, queue_size=10)
+        self.image_pub = rospy.Publisher("{}/cvimage".format(topic_name), Image, queue_size=10)
         self.frame_pub = rospy.Publisher(FRAME_TOPIC, FRAME_MSG_TYPE, queue_size=10)
 
         self.bridge = CvBridge()
@@ -68,8 +68,8 @@ class frame_updater:
                     id = ids[i]
                     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], self.ar_size, self.camera_matrix, self.distortion_coeffs)
                     #print("TAG {}:\nTVEC:\n{}\nRVEC:\n{}\n".format(id, tvec, rvec))
-                    aruco.drawDetectedMarkers(gray, corners)  # Draw A square around the markers
-                    aruco.drawAxis(gray, self.camera_matrix, self.distortion_coeffs, rvec, tvec, 0.01)  # Draw Axis
+                    aruco.drawDetectedMarkers(frame, corners)  # Draw A square around the markers
+                    aruco.drawAxis(frame, self.camera_matrix, self.distortion_coeffs, rvec, tvec, self.ar_size)  # Draw Axis
                     
                     tvec = np.array([tvec[0][0][0], tvec[0][0][1], tvec[0][0][2]])
                     rvec = np.array([rvec[0][0][0], rvec[0][0][1], rvec[0][0][2]])
@@ -80,7 +80,7 @@ class frame_updater:
                     t = geometry_msgs.msg.TransformStamped()
                     t.header.frame_id = self.camera_frame
                     t.header.stamp = rospy.Time.now()
-                    t.child_frame_id = TAG_FRAME.format(id)
+                    t.child_frame_id = TAG_FRAME.format(' '.join(map(str, id)))
                     t.transform.translation.x = tvec[0]
                     t.transform.translation.y = tvec[1]
                     t.transform.translation.z = tvec[2]
@@ -94,7 +94,7 @@ class frame_updater:
                     tfm = tf2_msgs.msg.TFMessage([t])
                     self.frame_pub.publish(tfm)
 
-            topic_image = self.bridge.cv2_to_imgmsg(gray)
+            topic_image = self.bridge.cv2_to_imgmsg(frame)
             self.image_pub.publish(topic_image)
 
         except CvBridgeError as e:

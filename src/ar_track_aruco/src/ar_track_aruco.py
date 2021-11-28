@@ -20,7 +20,7 @@ def main(args):
     frame = args[2]
     ar_marker_size = args[3] 
     rospy.init_node('ar_track_aruco', anonymous=True)
-    fu = frame_updater(topic_name, frame, ar_marker_size)
+    fu = frame_updater(topic_name, frame, float(ar_marker_size))
     try:
         rospy.spin()
     except KeyboardInterrupt:
