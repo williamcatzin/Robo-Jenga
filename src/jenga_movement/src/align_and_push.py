@@ -162,12 +162,57 @@ def main(args):
   
                 # Might have to edit this . . . 
                 plan = planner.plan_to_pose(hand_target_pose, [])
-
-                print(plan)
   
                 raw_input("Press <Enter> to execute plan: ")
   
-                if not controller.execute_path(plan):
+                if not planner.execute_plan(plan):
+                    raise Exception("Execution failed")
+                else:
+                    break
+
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+
+        while not rospy.is_shutdown():
+            try:
+  
+                hand_target_pose = PoseStamped()
+                hand_target_pose.header.frame_id = "base"
+  
+                #x, y, and z position
+                hand_target_pose.pose.position.x = hand_target_trans[0]
+                hand_target_pose.pose.position.y = hand_target_trans[1]
+                hand_target_pose.pose.position.z = hand_target_trans[2]
+  
+                #Orientation as a quaternion
+                hand_target_pose.pose.orientation.x = hand_target_rot[0]
+                hand_target_pose.pose.orientation.y = hand_target_rot[1]
+                hand_target_pose.pose.orientation.z = hand_target_rot[2]
+                hand_target_pose.pose.orientation.w = hand_target_rot[3]
+
+                t = geometry_msgs.msg.TransformStamped()
+                t.header.frame_id = "base"
+                t.header.stamp = rospy.Time.now()
+                t.child_frame_id = "hand_target"
+                t.transform.translation.x = hand_target_trans[0]
+                t.transform.translation.y = hand_target_trans[1]
+                t.transform.translation.z = hand_target_trans[2]
+
+                t.transform.rotation.x = hand_target_rot[0]
+                t.transform.rotation.y = hand_target_rot[1]
+                t.transform.rotation.z = hand_target_rot[2]
+                t.transform.rotation.w = hand_target_rot[3]
+
+                tfm = tf2_msgs.msg.TFMessage([t])
+                frame_pub.publish(tfm)
+  
+                # Might have to edit this . . . 
+                plan = planner.plan_to_pose(hand_target_pose, [])
+  
+                raw_input("Press <Enter> to move the right arm to goal pose 1: ")
+  
+                if not planner.execute_plan(plan):
                     raise Exception("Execution failed")
                 else:
                     break

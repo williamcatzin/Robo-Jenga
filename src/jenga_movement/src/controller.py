@@ -95,7 +95,7 @@ class Controller(object):
         self._limb.set_joint_velocities(dict(itertools.izip(self._limb.joint_names(), np.zeros(len(self._limb.joint_names())))))
         rospy.sleep(0.1)
 
-    def execute_path(self, path, timeout=100.0, log=True):
+    def execute_path(self, path, timeout=100.0, log=False):
         """
         Execute a given path
 
@@ -187,7 +187,7 @@ class Controller(object):
                     plt.ylabel(self._path.joint_trajectory.joint_names[joint])
                 plt.legend()
 
-            print "Close the plot window to continue"
+            print("Close the plot window to continue")
             plt.show()
 
         return True
