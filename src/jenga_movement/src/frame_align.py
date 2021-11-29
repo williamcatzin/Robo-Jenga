@@ -161,12 +161,12 @@ def main(args):
                 # Might have to edit this . . . 
                 plan = planner.plan_to_pose(hand_target_pose, [])
   
-                # raw_input("Press <Enter> to move the right arm to goal pose 1: ")
+                raw_input("Press <Enter> to move the right arm to goal pose 1: ")
   
-                # if not controller.execute_path(plan):
-                #     raise Exception("Execution failed")
-                # else:
-                #     break
+                if not planner.execute_plan(plan):
+                    raise Exception("Execution failed")
+                else:
+                    break
 
             except Exception as e:
                 print(e)
