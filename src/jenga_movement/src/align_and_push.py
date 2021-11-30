@@ -83,7 +83,7 @@ def main(args):
         while not rospy.is_shutdown():
             try:
 
-                raw_input("Press <Enter> to calculate path: ")
+                raw_input("Press <Enter> to calculate path")
                 
                 #define transform from tag to tool target (static for now)
                 tag_to_tool_target_trans = np.array([0, 0, -.05])
@@ -161,22 +161,20 @@ def main(args):
                 frame_pub.publish(tfm)
   
                 # Might have to edit this . . . 
-                plan = planner.plan_to_pose(hand_target_pose, [])
+                plan = controller.execute_path(hand_target_pose, [])
   
-                raw_input("Press <Enter> to execute plan: ")
+                raw_input("Press <Enter> to execute plan")
   
                 if not planner.execute_plan(plan):
                     raise Exception("Execution failed")
-                else:
-                    break
 
-            except Exception as e:
-                print(e)
-                traceback.print_exc()
+                raw_input("Press <Enter> to plan movement down")
+                #add for loop for each vertical offset
+                #KYLE'S CODE HERE
 
-        while not rospy.is_shutdown():
-            try:
-  
+                hand_target_trans = None #Change this
+                hand_target_rot = None #Change this
+
                 hand_target_pose = PoseStamped()
                 hand_target_pose.header.frame_id = "base"
   
@@ -212,7 +210,7 @@ def main(args):
   
                 raw_input("Press <Enter> to move the right arm to goal pose 1: ")
   
-                if not planner.execute_plan(plan):
+                if not controller.execute_path(plan):
                     raise Exception("Execution failed")
                 else:
                     break
@@ -220,6 +218,10 @@ def main(args):
             except Exception as e:
                 print(e)
                 traceback.print_exc()
+
+  
+
+
 
 if __name__ == '__main__':
     rospy.init_node('moveit_node')

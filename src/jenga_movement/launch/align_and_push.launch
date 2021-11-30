@@ -1,0 +1,16 @@
+<launch>
+
+  <node name="tool_frame_publish" pkg="tf" type="static_transform_publisher" args="0 0 .1 0 0 0 left_hand pokey_stick 100"/>
+
+  <!-- args="x y z yaw pitch roll frame_id child_frame_id  period" -->
+
+  <!-- Mapper node. -->
+  <node name="align_and_push"
+        pkg="jenga_movement"
+        type="align_and_push.py"
+        output="screen"
+        args="aruco_tag_0 pokey_stick left_hand">
+
+  <!-- args="tag_frame tool_frame hand_frame" -->
+  </node>
+</launch>
