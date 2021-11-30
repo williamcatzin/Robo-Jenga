@@ -85,6 +85,7 @@ def main(args):
 
                 raw_input("Press <Enter> to calculate path: ")
                 
+                # ar tag's current position frame to tool target frame
                 #define transform from tag to tool target (static for now)
                 tag_to_tool_target_trans = np.array([0, 0, -.05])
                 tag_to_tool_target_rot = np.array([-0.7071068, 0.7071068, 0, 0])
@@ -93,13 +94,20 @@ def main(args):
                 # tag_to_tool_target_t = transformations.identity_matrix()
 
                 #tool_target = tag * tag_to_target
+
+                #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSFORM)
                 tag_transform = tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0))
                 tag_trans = np.array([tag_transform.transform.translation.x, tag_transform.transform.translation.y, tag_transform.transform.translation.z])
                 tag_rot = np.array([tag_transform.transform.rotation.x, tag_transform.transform.rotation.y, tag_transform.transform.rotation.z, tag_transform.transform.rotation.w])
                 tag_t = np.matmul(transformations.translation_matrix(tag_trans), transformations.quaternion_matrix(tag_rot))
-  
+
+                #GET TOOL TARGET IN SPATIAL FRAME (FROM CURRENT AR TAG POSITION)
                 tool_target_t = np.matmul(tag_t, tag_to_tool_target_t)
 
+
+                #============================================
+
+                # PUBLISH TO RVIZ
                 tool_target_trans = transformations.translation_from_matrix(tool_target_t)
                 tool_target_rot = transformations.quaternion_from_matrix(tool_target_t)
 
@@ -115,10 +123,12 @@ def main(args):
                 t.transform.rotation.y = tool_target_rot[1]
                 t.transform.rotation.z = tool_target_rot[2]
                 t.transform.rotation.w = tool_target_rot[3]
-
+                
                 tfm = tf2_msgs.msg.TFMessage([t])
                 frame_pub.publish(tfm)
-  
+                #============================================
+
+                # (THIS IS CONSTANT) tool frame to hand frame
                 #hand_target = tool_to hand * tool_target (tool_to_hand is defined in a static transform, so it should always be the same)
                 tool_to_hand_transform = tfBuffer.lookup_transform(tool_frame, hand_frame, rospy.Time(0))
                 tool_to_hand_trans = np.array([tool_to_hand_transform.transform.translation.x, tool_to_hand_transform.transform.translation.y, tool_to_hand_transform.transform.translation.z])
@@ -126,10 +136,13 @@ def main(args):
                 tool_to_hand_t = np.matmul(transformations.translation_matrix(tool_to_hand_trans), transformations.quaternion_matrix(tool_to_hand_rot))
   
                 hand_target_t = np.matmul(tool_target_t, tool_to_hand_t,)
-  
+
+                #CONVERT TO ROTATION QUATERNION AND T VECTOR
                 hand_target_trans = transformations.translation_from_matrix(hand_target_t)
                 hand_target_rot = transformations.quaternion_from_matrix(hand_target_t)
-  
+                #============================================
+
+                #CREATE HAND TARGET POSE     
                 hand_target_pose = PoseStamped()
                 hand_target_pose.header.frame_id = "base"
   
@@ -143,7 +156,9 @@ def main(args):
                 hand_target_pose.pose.orientation.y = hand_target_rot[1]
                 hand_target_pose.pose.orientation.z = hand_target_rot[2]
                 hand_target_pose.pose.orientation.w = hand_target_rot[3]
+                #============================================
 
+                #RVIZ STUFF
                 t = geometry_msgs.msg.TransformStamped()
                 t.header.frame_id = "base"
                 t.header.stamp = rospy.Time.now()
@@ -159,8 +174,9 @@ def main(args):
 
                 tfm = tf2_msgs.msg.TFMessage([t])
                 frame_pub.publish(tfm)
-  
-                # Might have to edit this . . . 
+                #============================================
+
+                # GENERATE AND EXECUTE PLAN
                 plan = planner.plan_to_pose(hand_target_pose, [])
 
                 print(plan)
@@ -171,6 +187,7 @@ def main(args):
                     raise Exception("Execution failed")
                 else:
                     break
+                #============================================
 
             except Exception as e:
                 print(e)
