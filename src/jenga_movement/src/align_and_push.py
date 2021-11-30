@@ -192,8 +192,18 @@ def main(args):
 
                 raw_input("Press <Enter> to plan movement down")
 
-                hand_target_trans = None #Change this
-                hand_target_rot = None #Change this
+                hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
+                hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
+                hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
+
+                hand_target_trans[0] = hand_trans[0]
+                hand_target_trans[1] = hand_trans[1]
+                hand_target_trans[2] = hand_trans[2] - .015
+
+                hand_target_rot[0] = hand_rot[0]
+                hand_target_rot[1] = hand_rot[1]
+                hand_target_rot[2] = hand_rot[2]
+                hand_target_rot[3] = hand_rot[3]
 
                 hand_target_pose = PoseStamped()
                 hand_target_pose.header.frame_id = "base"
@@ -227,8 +237,10 @@ def main(args):
   
                 # Might have to edit this . . . 
                 plan = planner.plan_to_pose(hand_target_pose, [])
+
+                print(plan)
   
-                raw_input("Press <Enter> to move the right arm to goal pose 1: ")
+                raw_input("Press <Enter> to move down")
   
                 if not controller.execute_path(plan):
                     raise Exception("Execution failed")
