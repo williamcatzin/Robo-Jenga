@@ -83,12 +83,12 @@ def main(args):
         while not rospy.is_shutdown():
             try:
 
-                raw_input("Press <Enter> to calculate path: ")
+                
                 
                 # ar tag's current position frame to tool target frame
                 #define transform from tag to tool target (static for now)
                 tag_to_tool_target_trans = np.array([0, 0, -.05])
-                tag_to_tool_target_rot = np.array([-0.7071068, 0.7071068, 0, 0])
+                tag_to_tool_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
                 tag_to_tool_target_t = np.matmul(transformations.quaternion_matrix(tag_to_tool_target_rot), transformations.translation_matrix(tag_to_tool_target_trans))
                 # tag_to_tool_target_t = transformations.identity_matrix()
 
@@ -133,7 +133,7 @@ def main(args):
                 tool_to_hand_trans = np.array([tool_to_hand_transform.transform.translation.x, tool_to_hand_transform.transform.translation.y, tool_to_hand_transform.transform.translation.z])
                 tool_to_hand_rot = np.array([tool_to_hand_transform.transform.rotation.x, tool_to_hand_transform.transform.rotation.y, tool_to_hand_transform.transform.rotation.z, tool_to_hand_transform.transform.rotation.w])
                 tool_to_hand_t = np.matmul(transformations.translation_matrix(tool_to_hand_trans), transformations.quaternion_matrix(tool_to_hand_rot))
-  
+
                 hand_target_t = np.matmul(tool_target_t, tool_to_hand_t,)
 
                 #CONVERT TO ROTATION QUATERNION AND T VECTOR
@@ -144,12 +144,12 @@ def main(args):
                 #CREATE HAND TARGET POSE     
                 hand_target_pose = PoseStamped()
                 hand_target_pose.header.frame_id = "base"
-  
+
                 #x, y, and z position
                 hand_target_pose.pose.position.x = hand_target_trans[0]
                 hand_target_pose.pose.position.y = hand_target_trans[1]
                 hand_target_pose.pose.position.z = hand_target_trans[2]
-  
+
                 #Orientation as a quaternion
                 hand_target_pose.pose.orientation.x = hand_target_rot[0]
                 hand_target_pose.pose.orientation.y = hand_target_rot[1]
@@ -175,15 +175,17 @@ def main(args):
                 frame_pub.publish(tfm)
                 #============================================
 
-                # GENERATE AND EXECUTE PLAN
-                plan = planner.plan_to_pose(hand_target_pose, [])
+                if raw_input("Press q to calculate path to align to tag, anything else to skip: ") == "q":
 
-                print(plan)
-  
-                raw_input("Press <Enter> to execute plan: ")
-  
-                if not controller.execute_path(plan):
-                    raise Exception("Execution failed")
+                    # GENERATE AND EXECUTE PLAN
+                    plan = planner.plan_to_pose(hand_target_pose, [])
+
+                    print(plan)
+
+                    if raw_input("Press q to execute plan, anything else to skip: ") == "q":
+
+                        if not planner.execute_plan(plan):
+                            raise Exception("Execution failed")
 
                 #============================================
 
@@ -191,113 +193,116 @@ def main(args):
 
                 while(True):
 
-                    raw_input("Press <Enter> to plan movement down")
+                    if raw_input("Press q to plan movement down, anything else to skip: ") == "q":
 
-                    hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
-                    hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
-                    hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
-                    hand_t = np.matmul(transformations.translation_matrix(hand_trans), transformations.quaternion_matrix(hand_rot))
-                    
-                    move_down_trans = np.array([0, 0, -.015])
-                    move_down_t = transformations.translation_matrix(move_down_trans)
+                        hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
+                        hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
+                        hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
+                        hand_t = np.matmul(transformations.translation_matrix(hand_trans), transformations.quaternion_matrix(hand_rot))
+                        
+                        move_down_trans = np.array([0, 0, -.015])
+                        move_down_t = transformations.translation_matrix(move_down_trans)
 
-                    hand_target_t = np.matmul(move_down_t, hand_t) #move down in spatial frame
+                        hand_target_t = np.matmul(move_down_t, hand_t) #move down in spatial frame
 
-                    hand_target_pose = PoseStamped()
-                    hand_target_pose.header.frame_id = "base"
-    
-                    #x, y, and z position
-                    hand_target_pose.pose.position.x = hand_target_trans[0]
-                    hand_target_pose.pose.position.y = hand_target_trans[1]
-                    hand_target_pose.pose.position.z = hand_target_trans[2]
-    
-                    #Orientation as a quaternion
-                    hand_target_pose.pose.orientation.x = hand_target_rot[0]
-                    hand_target_pose.pose.orientation.y = hand_target_rot[1]
-                    hand_target_pose.pose.orientation.z = hand_target_rot[2]
-                    hand_target_pose.pose.orientation.w = hand_target_rot[3]
+                        hand_target_trans = transformations.translation_from_matrix(hand_target_t)
+                        hand_target_rot = transformations.quaternion_from_matrix(hand_target_t)
 
-                    t = geometry_msgs.msg.TransformStamped()
-                    t.header.frame_id = "base"
-                    t.header.stamp = rospy.Time.now()
-                    t.child_frame_id = "hand_target"
-                    t.transform.translation.x = hand_target_trans[0]
-                    t.transform.translation.y = hand_target_trans[1]
-                    t.transform.translation.z = hand_target_trans[2]
+                        hand_target_pose = PoseStamped()
+                        hand_target_pose.header.frame_id = "base"
+        
+                        #x, y, and z position
+                        hand_target_pose.pose.position.x = hand_target_trans[0]
+                        hand_target_pose.pose.position.y = hand_target_trans[1]
+                        hand_target_pose.pose.position.z = hand_target_trans[2]
+        
+                        #Orientation as a quaternion
+                        hand_target_pose.pose.orientation.x = hand_target_rot[0]
+                        hand_target_pose.pose.orientation.y = hand_target_rot[1]
+                        hand_target_pose.pose.orientation.z = hand_target_rot[2]
+                        hand_target_pose.pose.orientation.w = hand_target_rot[3]
 
-                    t.transform.rotation.x = hand_target_rot[0]
-                    t.transform.rotation.y = hand_target_rot[1]
-                    t.transform.rotation.z = hand_target_rot[2]
-                    t.transform.rotation.w = hand_target_rot[3]
+                        t = geometry_msgs.msg.TransformStamped()
+                        t.header.frame_id = "base"
+                        t.header.stamp = rospy.Time.now()
+                        t.child_frame_id = "hand_target"
+                        t.transform.translation.x = hand_target_trans[0]
+                        t.transform.translation.y = hand_target_trans[1]
+                        t.transform.translation.z = hand_target_trans[2]
 
-                    tfm = tf2_msgs.msg.TFMessage([t])
-                    frame_pub.publish(tfm)
-    
-                    # Might have to edit this . . . 
-                    plan = planner.plan_to_pose(hand_target_pose, [])
+                        t.transform.rotation.x = hand_target_rot[0]
+                        t.transform.rotation.y = hand_target_rot[1]
+                        t.transform.rotation.z = hand_target_rot[2]
+                        t.transform.rotation.w = hand_target_rot[3]
 
-                    print(plan)
-    
-                    raw_input("Press <Enter> to move down")
-    
-                    if not controller.execute_path(plan):
-                        raise Exception("Execution failed")
+                        tfm = tf2_msgs.msg.TFMessage([t])
+                        frame_pub.publish(tfm)
+        
+                        # Might have to edit this . . . 
+                        plan = planner.plan_to_pose(hand_target_pose, [])
 
-                    raw_input("Press <Enter> to plan movement forward")
+                        print(plan)
+        
+                        if raw_input("Press q to move down, anything else to skip: ") == "q":
+        
+                            if not planner.execute_plan(plan):
+                                raise Exception("Execution failed")
 
-                    hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
-                    hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
-                    hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
-                    hand_t = np.matmul(transformations.translation_matrix(hand_trans), transformations.quaternion_matrix(hand_rot))
+                    if raw_input("Press q to plan movement forward, ahything else to skip: ") == "q":
 
-                    move_forward_trans = np.array([0, 0, .0375])
-                    move_forward_t = transformations.translation_matrix(move_forward_trans)
+                        hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
+                        hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
+                        hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
+                        hand_t = np.matmul(transformations.translation_matrix(hand_trans), transformations.quaternion_matrix(hand_rot))
 
-                    hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
+                        move_forward_trans = np.array([0, 0, .0375])
+                        move_forward_t = transformations.translation_matrix(move_forward_trans)
 
-                    hand_target_trans = transformations.translation_from_matrix(hand_target_t)
-                    hand_target_rot = transformations.quaternion_from_matrix(hand_target_t)
-                    
+                        hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
 
-                    hand_target_pose = PoseStamped()
-                    hand_target_pose.header.frame_id = "base"
-    
-                    #x, y, and z position
-                    hand_target_pose.pose.position.x = hand_target_trans[0]
-                    hand_target_pose.pose.position.y = hand_target_trans[1]
-                    hand_target_pose.pose.position.z = hand_target_trans[2]
-    
-                    #Orientation as a quaternion
-                    hand_target_pose.pose.orientation.x = hand_target_rot[0]
-                    hand_target_pose.pose.orientation.y = hand_target_rot[1]
-                    hand_target_pose.pose.orientation.z = hand_target_rot[2]
-                    hand_target_pose.pose.orientation.w = hand_target_rot[3]
+                        hand_target_trans = transformations.translation_from_matrix(hand_target_t)
+                        hand_target_rot = transformations.quaternion_from_matrix(hand_target_t)
+                        
 
-                    t = geometry_msgs.msg.TransformStamped()
-                    t.header.frame_id = "base"
-                    t.header.stamp = rospy.Time.now()
-                    t.child_frame_id = "hand_target"
-                    t.transform.translation.x = hand_target_trans[0]
-                    t.transform.translation.y = hand_target_trans[1]
-                    t.transform.translation.z = hand_target_trans[2]
+                        hand_target_pose = PoseStamped()
+                        hand_target_pose.header.frame_id = "base"
+        
+                        #x, y, and z position
+                        hand_target_pose.pose.position.x = hand_target_trans[0]
+                        hand_target_pose.pose.position.y = hand_target_trans[1]
+                        hand_target_pose.pose.position.z = hand_target_trans[2]
+        
+                        #Orientation as a quaternion
+                        hand_target_pose.pose.orientation.x = hand_target_rot[0]
+                        hand_target_pose.pose.orientation.y = hand_target_rot[1]
+                        hand_target_pose.pose.orientation.z = hand_target_rot[2]
+                        hand_target_pose.pose.orientation.w = hand_target_rot[3]
 
-                    t.transform.rotation.x = hand_target_rot[0]
-                    t.transform.rotation.y = hand_target_rot[1]
-                    t.transform.rotation.z = hand_target_rot[2]
-                    t.transform.rotation.w = hand_target_rot[3]
+                        t = geometry_msgs.msg.TransformStamped()
+                        t.header.frame_id = "base"
+                        t.header.stamp = rospy.Time.now()
+                        t.child_frame_id = "hand_target"
+                        t.transform.translation.x = hand_target_trans[0]
+                        t.transform.translation.y = hand_target_trans[1]
+                        t.transform.translation.z = hand_target_trans[2]
 
-                    tfm = tf2_msgs.msg.TFMessage([t])
-                    frame_pub.publish(tfm)
-    
-                    # Might have to edit this . . . 
-                    plan = planner.plan_to_pose(hand_target_pose, [])
+                        t.transform.rotation.x = hand_target_rot[0]
+                        t.transform.rotation.y = hand_target_rot[1]
+                        t.transform.rotation.z = hand_target_rot[2]
+                        t.transform.rotation.w = hand_target_rot[3]
 
-                    print(plan)
-    
-                    raw_input("Press <Enter> to move forward")
-    
-                    if not controller.execute_path(plan):
-                        raise Exception("Execution failed")
+                        tfm = tf2_msgs.msg.TFMessage([t])
+                        frame_pub.publish(tfm)
+        
+                        # Might have to edit this . . . 
+                        plan = planner.plan_to_pose(hand_target_pose, [])
+
+                        print(plan)
+        
+                        if raw_input("Press q to move forward, anything else to skip: ") == "q":
+        
+                            if not planner.execute_plan(plan):
+                                raise Exception("Execution failed")
 
             except Exception as e:
                 print(e)
