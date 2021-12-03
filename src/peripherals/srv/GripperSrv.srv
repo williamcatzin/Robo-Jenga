@@ -1,0 +1,5 @@
+# Gripper request to open or close
+string command
+---
+# Feedback string to affirm client
+string feedback
