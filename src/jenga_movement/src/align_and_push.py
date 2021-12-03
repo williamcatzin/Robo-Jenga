@@ -7,6 +7,7 @@ import sys
 
 from baxter_interface import Limb
 
+import helpers 
 import rospy
 import numpy as np
 import traceback
@@ -43,6 +44,8 @@ def main(args):
     tag_frame = args[1]
     tool_frame = args[2]
     hand_frame = args[3]
+    claw_frame = args[4]
+    right_hand_frame = args[5]
 
     tfBuffer = tf2_ros.Buffer()
     _ = tf2_ros.TransformListener(tfBuffer)
@@ -51,17 +54,8 @@ def main(args):
 
     # Make sure that you've looked at and understand path_planner.py before starting
 
-    planner = PathPlanner("left_arm")
-
-    Kp = 0.45 * np.array([0.8, 2.5, 1.7, 2.2, 2.4, 3, 4])
-    Kd = 0.015 * np.array([2, 1, 2, 0.5, 0.8, 0.8, 0.8])
-    Ki = 0.01 * np.array([1.4, 1.4, 1.4, 1, 0.6, 0.6, 0.6])
-    Kw = np.array([0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9])
-
-
-    limb = Limb("left")
-    controller = Controller(Kp, Ki, Kd, Kw, limb)
-
+    stick_planner = PathPlanner("left_arm")
+    claw_planner = PathPlanner("right_arm")
 
     ##
     ## Add the obstacle to the planning scene here
@@ -94,7 +88,7 @@ def main(args):
 
                 #tool_target = tag * tag_to_target
 
-                #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSFORM)
+                #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
                 tag_transform = tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0))
                 tag_trans = np.array([tag_transform.transform.translation.x, tag_transform.transform.translation.y, tag_transform.transform.translation.z])
                 tag_rot = np.array([tag_transform.transform.rotation.x, tag_transform.transform.rotation.y, tag_transform.transform.rotation.z, tag_transform.transform.rotation.w])
@@ -134,7 +128,7 @@ def main(args):
                 tool_to_hand_rot = np.array([tool_to_hand_transform.transform.rotation.x, tool_to_hand_transform.transform.rotation.y, tool_to_hand_transform.transform.rotation.z, tool_to_hand_transform.transform.rotation.w])
                 tool_to_hand_t = np.matmul(transformations.translation_matrix(tool_to_hand_trans), transformations.quaternion_matrix(tool_to_hand_rot))
 
-                hand_target_t = np.matmul(tool_target_t, tool_to_hand_t,)
+                hand_target_t = np.matmul(tool_target_t, tool_to_hand_t)
 
                 #CONVERT TO ROTATION QUATERNION AND T VECTOR
                 hand_target_trans = transformations.translation_from_matrix(hand_target_t)
@@ -178,28 +172,30 @@ def main(args):
                 if raw_input("Press q to calculate path to align to tag, anything else to skip: ") == "q":
 
                     # GENERATE AND EXECUTE PLAN
-                    plan = planner.plan_to_pose(hand_target_pose, [])
+                    plan = stick_planner.plan_to_pose(hand_target_pose, [])
 
                     print(plan)
 
                     if raw_input("Press q to execute plan, anything else to skip: ") == "q":
 
-                        if not planner.execute_plan(plan):
+                        if not stick_planner.execute_plan(plan):
                             raise Exception("Execution failed")
 
                 #============================================
 
                 #add for loop for each vertical offset
 
-                while(True):
+                #initialize dummy variable for final pose
+                final_pose = PoseStamped()
+                final_trans = np.array([])
+                final_trans = np.array([])
 
+                while(True):
+                    
                     if raw_input("Press q to plan movement down, anything else to skip: ") == "q":
 
                         hand_transform = tfBuffer.lookup_transform("base", hand_frame, rospy.Time(0))
-                        hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, hand_transform.transform.translation.z])
-                        hand_rot = np.array([hand_transform.transform.rotation.x, hand_transform.transform.rotation.y, hand_transform.transform.rotation.z, hand_transform.transform.rotation.w])
-                        hand_t = np.matmul(transformations.translation_matrix(hand_trans), transformations.quaternion_matrix(hand_rot))
-                        
+                        hand_trans = np.array([hand_transform.transform.translation.x, hand_transform.transform.translation.y, ha0.0254
                         move_down_trans = np.array([0, 0, -.015])
                         move_down_t = transformations.translation_matrix(move_down_trans)
 
@@ -239,13 +235,13 @@ def main(args):
                         frame_pub.publish(tfm)
         
                         # Might have to edit this . . . 
-                        plan = planner.plan_to_pose(hand_target_pose, [])
+                        plan = stick_planner.plan_to_pose(hand_target_pose, [])
 
                         print(plan)
         
                         if raw_input("Press q to move down, anything else to skip: ") == "q":
         
-                            if not planner.execute_plan(plan):
+                            if not stick_planner.execute_plan(plan):
                                 raise Exception("Execution failed")
 
                     if raw_input("Press q to plan movement forward, ahything else to skip: ") == "q":
@@ -295,14 +291,99 @@ def main(args):
                         frame_pub.publish(tfm)
         
                         # Might have to edit this . . . 
-                        plan = planner.plan_to_pose(hand_target_pose, [])
+                        plan = stick_planner.plan_to_pose(hand_target_pose, [])
 
                         print(plan)
         
                         if raw_input("Press q to move forward, anything else to skip: ") == "q":
         
-                            if not planner.execute_plan(plan):
+                            if not stick_planner.execute_plan(plan):
                                 raise Exception("Execution failed")
+
+                        if raw_input("Press q to plan motion of right arm to block, anything else to skip: ") == "q":
+
+                            tool_transform = tfBuffer.lookup_transform("base", tool_frame, rospy.Time(0))
+                            tool_trans = np.array([tool_transform.transform.translation.x, tool_transform.transform.translation.y, tool_transform.transform.translation.z])
+                            tool_rot = np.array([tool_transform.transform.rotation.x, tool_transform.transform.rotation.y, tool_transform.transform.rotation.z, tool_transform.transform.rotation.w])
+                            tool_t = np.matmul(transformations.translation_matrix(tool_trans), transformations.quaternion_matrix(tool_rot))
+
+                            tool_to_claw_target_trans = np.array([0, 0, -0.065])
+                            tool_to_claw_target_rot = np.array([1, 0, 0, 0])
+                            tool_to_claw_target_t = np.matmul(transformations.quaternion_matrix(tool_to_claw_target_rot), transformations.translation_matrix(tool_to_claw_target_trans))
+
+                            #base to claw
+                            claw_target_t = np.matmul(tool_t, tool_to_claw_target_t)
+
+                            claw_target_trans = transformations.translation_from_matrix(claw_target_t)
+                            claw_target_rot = transformations.quaternion_from_matrix(claw_target_t) 
+
+
+                            t = geometry_msgs.msg.TransformStamped()
+                            t.header.frame_id = "base"
+                            t.header.stamp = rospy.Time.now()
+                            t.child_frame_id = "claw_target"
+                            t.transform.translation.x = claw_target_trans[0]
+                            t.transform.translation.y = claw_target_trans[1]
+                            t.transform.translation.z = claw_target_trans[2]
+
+                            t.transform.rotation.x = claw_target_rot[0]
+                            t.transform.rotation.y = claw_target_rot[1]
+                            t.transform.rotation.z = claw_target_rot[2]
+                            t.transform.rotation.w = claw_target_rot[3]
+
+                            tfm = tf2_msgs.msg.TFMessage([t])
+                            frame_pub.publish(tfm)
+
+
+                            claw_to_right_hand_transform = tfBuffer.lookup_transform(claw_frame, right_hand_frame, rospy.Time(0))
+                            claw_to_right_hand_trans = np.array([claw_to_right_hand_transform.transform.translation.x, claw_to_right_hand_transform.transform.translation.y, claw_to_right_hand_transform.transform.translation.z])
+                            claw_to_right_hand_rot = np.array([claw_to_right_hand_transform.transform.rotation.x, claw_to_right_hand_transform.transform.rotation.y, claw_to_right_hand_transform.transform.rotation.z, claw_to_right_hand_transform.transform.rotation.w])
+                            claw_to_right_hand_t = np.matmul(transformations.translation_matrix(claw_to_right_hand_trans), transformations.quaternion_matrix(claw_to_right_hand_rot))
+
+                            right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)
+                            right_hand_target_trans = transformations.translation_from_matrix(right_hand_target_t)
+                            right_hand_target_rot = transformations.quaternion_from_matrix(right_hand_target_t)         
+
+                            right_hand_target_pose = PoseStamped()
+                            right_hand_target_pose.header.frame_id = "base"
+            
+                            #x, y, and z position
+                            right_hand_target_pose.pose.position.x = right_hand_target_trans[0]
+                            right_hand_target_pose.pose.position.y = right_hand_target_trans[1]
+                            right_hand_target_pose.pose.position.z = right_hand_target_trans[2]
+            
+                            #Orientation as a quaternion
+                            right_hand_target_pose.pose.orientation.x = right_hand_target_rot[0]
+                            right_hand_target_pose.pose.orientation.y = right_hand_target_rot[1]
+                            right_hand_target_pose.pose.orientation.z = right_hand_target_rot[2]
+                            right_hand_target_pose.pose.orientation.w = right_hand_target_rot[3]
+
+                            t = geometry_msgs.msg.TransformStamped()
+                            t.header.frame_id = "base"
+                            t.header.stamp = rospy.Time.now()
+                            t.child_frame_id = "right_hand_target"
+                            t.transform.translation.x = right_hand_target_trans[0]
+                            t.transform.translation.y = right_hand_target_trans[1]
+                            t.transform.translation.z = right_hand_target_trans[2]
+
+                            t.transform.rotation.x = right_hand_target_rot[0]
+                            t.transform.rotation.y = right_hand_target_rot[1]
+                            t.transform.rotation.z = right_hand_target_rot[2]
+                            t.transform.rotation.w = right_hand_target_rot[3]
+
+                            tfm = tf2_msgs.msg.TFMessage([t])
+                            frame_pub.publish(tfm)
+
+                            #right hand
+                            plan = claw_planner.plan_to_pose(right_hand_target_pose, [])
+                            
+                            if raw_input("Press q to move right hand, anything else to skip: ") == "q":
+                                if not claw_planner.execute_plan(plan):
+                                        raise Exception("Execution failed")
+                    
+                    
+                
+                
 
             except Exception as e:
                 print(e)
