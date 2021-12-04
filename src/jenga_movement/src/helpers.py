@@ -60,7 +60,8 @@ def g_to_tf(g, parent_frame_id, child_frame_id):
 def tf_to_g(transform):
     trans = np.array([transform.transform.translation.x, transform.transform.translation.y, transform.transform.translation.z])
     rot = np.array([transform.transform.rotation.x, transform.transform.rotation.y, transform.transform.rotation.z, transform.transform.rotation.w])
-    t = vec_to_g(trans, rot)
+    return vec_to_g(trans, rot)
+    
 
 def g_to_pose(g, parent_frame):
     trans, rot = g_to_vec(g)

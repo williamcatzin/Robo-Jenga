@@ -61,7 +61,7 @@ def main(args):
             try:
                 #============================================
                 # GET TAG TO STICK
-                tag_to_stick_target_trans = np.array([0, 0, -.05])
+                tag_to_stick_target_trans = np.array([0, 0, 0])
                 tag_to_stick_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
                 tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
 
@@ -73,7 +73,7 @@ def main(args):
                 #============================================
                 # PUBLISH TO TF
                 
-                frame_pub.publish(helpers.g_to_tf(stick_target_t))
+                frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", stick_frame))
                 #============================================
 
                 stick_to_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(stick_frame, left_hand_frame, rospy.Time(0)))
@@ -81,7 +81,7 @@ def main(args):
                 hand_target_t = np.matmul(stick_target_t, stick_to_hand_t)
 
                 #CREATE HAND TARGET POSE     
-                hand_target_pose = helpers.g_to_pose(hand_target_t)
+                hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
                 #============================================
                 # PUBLISH TO TF
 
@@ -115,7 +115,7 @@ def main(args):
 
                         frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
 
-                        hand_target_pose = helpers.g_to_pose(hand_target_t)
+                        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
 
                         plan = stick_planner.plan_to_pose(hand_target_pose, [])
 
@@ -137,7 +137,7 @@ def main(args):
                         
                         frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
 
-                        hand_target_pose = helpers.g_to_pose(hand_target_t)
+                        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
 
                         plan = stick_planner.plan_to_pose(hand_target_pose, [])
 
@@ -158,15 +158,15 @@ def main(args):
 
                         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-                        frame_pub.publish(helpers.g_to_tf(claw_target_t))
+                        frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", claw_frame))
 
                         claw_to_right_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(claw_frame, right_hand_frame, rospy.Time(0)))
 
                         right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
 
-                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t))
+                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", right_hand_frame))
 
-                        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t)
+                        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
 
                         plan = claw_planner.plan_to_pose(right_hand_target_pose, [])
                         
