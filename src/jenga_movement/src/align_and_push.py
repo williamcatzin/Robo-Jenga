@@ -158,13 +158,13 @@ def main(args):
 
                         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-                        frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", claw_frame))
+                        frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
 
                         claw_to_right_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(claw_frame, right_hand_frame, rospy.Time(0)))
 
                         right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
 
-                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", right_hand_frame))
+                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
 
                         right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
 
