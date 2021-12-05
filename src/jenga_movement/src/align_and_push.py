@@ -169,10 +169,60 @@ def main(args):
                         right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
 
                         plan = claw_planner.plan_to_pose(right_hand_target_pose, [])
+
+
                         
                         if raw_input("Press q to move right hand, anything else to skip: ") == "q":
                             if not claw_planner.execute_plan(plan):
                                     raise Exception("Execution failed")
+
+                    if raw_input("Press q to plan motion of right arm backwards, anything else to skip: ") == "q":
+
+                        hand_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", right_hand_frame, rospy.Time(0)))
+                        #MOVE BACKWARDS
+                        move_backwards_trans = np.array([0, -0.05, 0])
+                        move_backwards_t = transformations.translation_matrix(move_backwards_trans)
+                        hand_target_t = np.matmul(move_backwards_t, hand_t) #move down in spatial frame
+                        frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+                        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
+                        plan = claw_planner.plan_to_pose(hand_target_pose, [])
+
+                        if raw_input("Press q to move right hand back, anything else to skip: ") == "q":
+                            if not claw_planner.execute_plan(plan):
+                                    raise Exception("Execution failed")
+                        
+                    if raw_input("Press q to plan motion of right arm up tower, anything else to skip: ") == "q":
+                        #MOVE UP TOWER
+                        hand_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", right_hand_frame, rospy.Time(0)))
+                        move_up_trans = np.array([0, 0, 0.1])
+                        move_up_t = transformations.translation_matrix(move_up_trans)
+                        hand_target_t = np.matmul(move_up_t, hand_t) #move down in spatial frame
+                        frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+                        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
+                        plan = claw_planner.plan_to_pose(hand_target_pose, [])
+
+                        if raw_input("Press q to move right hand up tower, anything else to skip: ") == "q":
+                            if not claw_planner.execute_plan(plan):
+                                    raise Exception("Execution failed")
+
+                    if raw_input("Press q to plan motion of right arm foward, anything else to skip: ") == "q":
+                        #MOVE FORWARD
+                        hand_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", right_hand_frame, rospy.Time(0)))
+                        move_forward_trans = np.array([0, 0.05, 0])
+                        move_forward_t = transformations.translation_matrix(move_forward_trans)
+                        hand_target_t = np.matmul(move_forward_t, hand_t) #move down in spatial frame
+                        frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+                        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
+                        plan = claw_planner.plan_to_pose(hand_target_pose, [])
+
+                        if raw_input("Press q to move right hand forward, anything else to skip: ") == "q":
+                            if not claw_planner.execute_plan(plan):
+                                    raise Exception("Execution failed")
+
+
+
+                    
+
 
             except Exception as e:
                 print(e)
