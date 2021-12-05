@@ -15,12 +15,6 @@ from geometry_msgs.msg import PoseStamped
 # from geographic_msgs import Vector3
 # from geographic_msgs import Quaternion
 
-from path_planner import PathPlanner
-try:
-    from controller import Controller
-except ImportError:
-    pass
-
 import transformations
 
 import tf2_ros

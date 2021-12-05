@@ -59,46 +59,47 @@ def main(args):
 
         while not rospy.is_shutdown():
             try:
-                #============================================
-                # GET TAG TO STICK
-                tag_to_stick_target_trans = np.array([0, 0, 0])
-                tag_to_stick_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
-                tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
+                while(True):
+                    #============================================
+                    # GET TAG TO STICK
+                    tag_to_claw_target_trans = np.array([0, 0, 0])
+                    tag_to_claw_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
+                    tag_to_claw_target_t = helpers.vec_to_g(tag_to_claw_target_trans, tag_to_claw_target_rot)
 
-                #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
-                tag_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0)))
+                    #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
+                    tag_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0)))
 
-                #GET STICK TARGET IN SPATIAL FRAME (FROM CURRENT AR TAG POSITION)
-                stick_target_t = np.matmul(tag_t, tag_to_stick_target_t)
-                #============================================
-                # PUBLISH TO TF
-                
-                frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", stick_frame))
-                #============================================
+                    #GET STICK TARGET IN SPATIAL FRAME (FROM CURRENT AR TAG POSITION)
+                    claw_target_t = np.matmul(tag_t, tag_to_claw_target_t)
+                    #============================================
+                    # PUBLISH TO TF
+                    
+                    frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
+                    #============================================
 
-                stick_to_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(stick_frame, left_hand_frame, rospy.Time(0)))
+                    claw_to_right_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(claw_frame, right_hand_frame, rospy.Time(0)))
 
-                hand_target_t = np.matmul(stick_target_t, stick_to_hand_t)
+                    right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)
 
-                #CREATE HAND TARGET POSE     
-                hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
-                #============================================
-                # PUBLISH TO TF
+                    #CREATE HAND TARGET POSE     
+                    right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
+                    #============================================
+                    # PUBLISH TO TF
 
-                frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
-                #============================================
+                    frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
+                    #============================================
 
-                if raw_input("Press q to calculate path to align to tag, anything else to skip: ") == "q":
+                    if raw_input("Press q to calculate path to align to tag, anything else to skip: ") == "q":
 
-                    # GENERATE AND EXECUTE PLAN
-                    plan = stick_planner.plan_to_pose(hand_target_pose, [])
+                        # GENERATE AND EXECUTE PLAN
+                        plan = claw_planner.plan_to_pose(right_hand_target_pose, [])
 
-                    print(plan)
+                        print(plan)
 
-                    if raw_input("Press q to execute plan, anything else to skip: ") == "q":
+                        if raw_input("Press q to execute plan, anything else to skip: ") == "q":
 
-                        if not stick_planner.execute_plan(plan):
-                            raise Exception("Execution failed")
+                            if not claw_planner.execute_plan(plan):
+                                raise Exception("Execution failed")
 
                 #============================================
                 while(True):
@@ -158,13 +159,13 @@ def main(args):
 
                         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-                        frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", claw_frame))
+                        frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
 
                         claw_to_right_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(claw_frame, right_hand_frame, rospy.Time(0)))
 
                         right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
 
-                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", right_hand_frame))
+                        frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
 
                         right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
 
