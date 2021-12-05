@@ -96,7 +96,6 @@ def main(args):
                     print(plan)
 
                     if raw_input("Press q to execute plan, anything else to skip: ") == "q":
-
                         if not stick_planner.execute_plan(plan):
                             raise Exception("Execution failed")
 
@@ -122,7 +121,6 @@ def main(args):
                         print(plan)
         
                         if raw_input("Press q to move down, anything else to skip: ") == "q":
-        
                             if not stick_planner.execute_plan(plan):
                                 raise Exception("Execution failed")
 
@@ -144,7 +142,6 @@ def main(args):
                         print(plan)
         
                         if raw_input("Press q to move forward, anything else to skip: ") == "q":
-        
                             if not stick_planner.execute_plan(plan):
                                 raise Exception("Execution failed")
 
@@ -174,7 +171,7 @@ def main(args):
                         
                         if raw_input("Press q to move right hand, anything else to skip: ") == "q":
                             if not claw_planner.execute_plan(plan):
-                                    raise Exception("Execution failed")
+                                raise Exception("Execution failed")
 
                     if raw_input("Press q to plan motion of right arm backwards, anything else to skip: ") == "q":
 
@@ -189,7 +186,7 @@ def main(args):
 
                         if raw_input("Press q to move right hand back, anything else to skip: ") == "q":
                             if not claw_planner.execute_plan(plan):
-                                    raise Exception("Execution failed")
+                                raise Exception("Execution failed")
                         
                     if raw_input("Press q to plan motion of right arm up tower, anything else to skip: ") == "q":
                         #MOVE UP TOWER
@@ -203,7 +200,7 @@ def main(args):
 
                         if raw_input("Press q to move right hand up tower, anything else to skip: ") == "q":
                             if not claw_planner.execute_plan(plan):
-                                    raise Exception("Execution failed")
+                                raise Exception("Execution failed")
 
                     if raw_input("Press q to plan motion of right arm foward, anything else to skip: ") == "q":
                         #MOVE FORWARD
@@ -217,7 +214,7 @@ def main(args):
 
                         if raw_input("Press q to move right hand forward, anything else to skip: ") == "q":
                             if not claw_planner.execute_plan(plan):
-                                    raise Exception("Execution failed")
+                                raise Exception("Execution failed")
 
 
 
