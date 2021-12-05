@@ -17,6 +17,7 @@ from geometry_msgs.msg import PoseStamped
 # from geographic_msgs import Transform
 # from geographic_msgs import Vector3
 # from geographic_msgs import Quaternion
+from std_msgs.msg import Float32
 
 from path_planner import PathPlanner
 try:
@@ -30,6 +31,12 @@ import tf2_ros
 
 import tf2_msgs.msg
 import geometry_msgs.msg
+
+# Force threshold
+MAX_FORCE = 0.5
+
+# Current Force
+FORCE = 0.0
 
 # Topic name to publish
 FRAME_TOPIC = "/tf"
@@ -54,6 +61,9 @@ def main(args):
 
     stick_planner = PathPlanner("left_arm")
     claw_planner = PathPlanner("right_arm")
+
+    def callback(force):
+        FORCE = force
 
     while not rospy.is_shutdown():
 
@@ -127,21 +137,23 @@ def main(args):
                                 raise Exception("Execution failed")
 
                     if raw_input("Press q to plan movement forward, ahything else to skip: ") == "q":
+                        rospy.Subscribe('push_force', Float32, callback)
+                        distances = np.linspace(0, 0.375, 100)
+                        for dist in distances:
+                            hand_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", left_hand_frame, rospy.Time(0)))
 
-                        hand_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", left_hand_frame, rospy.Time(0)))
+                            move_forward_trans = np.array([0, 0, dist])
+                            move_forward_t = transformations.translation_matrix(move_forward_trans)
 
-                        move_forward_trans = np.array([0, 0, .0375])
-                        move_forward_t = transformations.translation_matrix(move_forward_trans)
+                            hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
+                            
+                            frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
 
-                        hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
-                        
-                        frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
-
-                        hand_target_pose = helpers.g_to_pose(hand_target_t)
-
-                        plan = stick_planner.plan_to_pose(hand_target_pose, [])
-
-                        print(plan)
+                            hand_target_pose = helpers.g_to_pose(hand_target_t)
+                            plan = stick_planner.plan_to_pose(hand_target_pose, [])
+                            print(plan)
+                            if FORCE > MAX_FORCE:
+                                break
         
                         if raw_input("Press q to move forward, anything else to skip: ") == "q":
         
