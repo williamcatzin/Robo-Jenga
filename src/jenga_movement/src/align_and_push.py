@@ -59,36 +59,36 @@ def main(args):
 
         while not rospy.is_shutdown():
             try:
-                #============================================
-                # GET TAG TO STICK
-                tag_to_stick_target_trans = np.array([0, 0, .015 * 18])
-                tag_to_stick_target_rot = np.array([0.5, -0.5, 0.5, 0.5])
-                tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
-
-                #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
-                tag_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0)))
-
-                #GET STICK TARGET IN SPATIAL FRAME (FROM CURRENT AR TAG POSITION)
-                stick_target_t = np.matmul(tag_t, tag_to_stick_target_t)
-                #============================================
-                # PUBLISH TO TF
-                
-                frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", stick_frame))
-                #============================================
-
-                stick_to_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(stick_frame, left_hand_frame, rospy.Time(0)))
-
-                hand_target_t = np.matmul(stick_target_t, stick_to_hand_t)
-
-                #CREATE HAND TARGET POSE     
-                hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
-                #============================================
-                # PUBLISH TO TF
-
-                frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
-                #============================================
-
                 if raw_input("Press q to calculate path to align to tag, anything else to skip: ") == "q":
+
+                    #============================================
+                    # GET TAG TO STICK
+                    tag_to_stick_target_trans = np.array([0, 0, .015 * 18])
+                    tag_to_stick_target_rot = np.array([0.5, -0.5, 0.5, 0.5])
+                    tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
+
+                    #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
+                    tag_t = helpers.tf_to_g(tfBuffer.lookup_transform("base", tag_frame, rospy.Time(0)))
+
+                    #GET STICK TARGET IN SPATIAL FRAME (FROM CURRENT AR TAG POSITION)
+                    stick_target_t = np.matmul(tag_t, tag_to_stick_target_t)
+                    #============================================
+                    # PUBLISH TO TF
+                    
+                    frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", stick_frame))
+                    #============================================
+
+                    stick_to_hand_t = helpers.tf_to_g(tfBuffer.lookup_transform(stick_frame, left_hand_frame, rospy.Time(0)))
+
+                    hand_target_t = np.matmul(stick_target_t, stick_to_hand_t)
+
+                    #CREATE HAND TARGET POSE     
+                    hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
+                    #============================================
+                    # PUBLISH TO TF
+
+                    frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+                    #============================================
 
                     # GENERATE AND EXECUTE PLAN
                     plan = stick_planner.plan_to_pose(hand_target_pose, [])
