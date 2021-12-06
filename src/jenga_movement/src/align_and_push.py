@@ -63,8 +63,8 @@ def main(args):
 
                     #============================================
                     # GET TAG TO STICK
-                    tag_to_stick_target_trans = np.array([0, 0, .015 * 18])
-                    tag_to_stick_target_rot = np.array([0.5, -0.5, 0.5, 0.5])
+                    tag_to_stick_target_trans = np.array([0, 0, 0])
+                    tag_to_stick_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
                     tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
 
                     #FIND WHERE TAG IS (GET TAG HOMOGENOUS TRANSrospy.init_node('moveit_node')FORM)
