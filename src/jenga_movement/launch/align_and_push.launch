@@ -10,6 +10,6 @@
         pkg="jenga_movement"
         type="align_and_push.py"
         output="screen"
-        args="aruco_tag_0 pokey_stick left_hand grabby_claw right_hand">
+        args="aruco_tag_1_filtered pokey_stick left_hand grabby_claw right_hand">
   </node>
 </launch>
