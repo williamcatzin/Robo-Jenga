@@ -18,8 +18,8 @@ _port = '/dev/ttyUSB0'
 _baudrate = 460800
 
 def main():
-    pub = rospy.Publisher('push_force', Float32, queue_size=10)
     rospy.init_node('push_peripheral', anonymous=True)
+    pub = rospy.Publisher('push_force', Float32, queue_size=10)
     ser = serial.Serial(_port, _baudrate)
     ser.flushInput()
     ser.flushOutput()
@@ -29,10 +29,8 @@ def main():
         # Uncomment to print load cell data
         print(data)
         pub.publish(data)
-        rate.sleep(5)
+        rate.sleep()
         
-
-
 
 
 if __name__ == '__main__':
