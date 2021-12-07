@@ -23,13 +23,11 @@ def main():
     ser = serial.Serial(_port, _baudrate)
     ser.flushInput()
     ser.flushOutput()
-    rate = rospy.Rate(5) # ROS Rate at 5Hz
     while not rospy.is_shutdown():
         data = float(ser.readline().decode('utf-8'))
         # Uncomment to print load cell data
         print(data)
         pub.publish(data)
-        rate.sleep()
         
 
 

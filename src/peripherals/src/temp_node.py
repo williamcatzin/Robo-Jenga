@@ -13,10 +13,18 @@ import rospy
 from peripherals.srv import GripperSrv
 
 def comm_gripper(comm):
-    rospy.wait_for_service('gripper_srv')
+    # rospy.wait_for_service('open_gripper')
+    # try:
+    #     send_command = rospy.ServiceProxy('open_gripper', GripperSrv)
+    #     response = send_command("D")
+    #     print(response)
+    # except rospy.ServiceException as e:
+    #     print("Service call failed: %s"%e)
+    
+    rospy.wait_for_service('close_gripper')
     try:
-        send_command = rospy.ServiceProxy('gripper_srv', GripperSrv)
-        response = send_command("open")
+        send_command = rospy.ServiceProxy('close_gripper', GripperSrv)
+        response = send_command("D")
         print(response)
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)

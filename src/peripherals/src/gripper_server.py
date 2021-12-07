@@ -14,10 +14,35 @@ from gripper import Gripper
 from peripherals.srv import GripperSrv
 
 
+# Port name for serial port
+_port = '/dev/ttyUSB0'
+# baude rate of the esp32
+_baudrate = 9600
+
+#When another node calls the service, return the last image
+def close_gripper(msg):
+    print("Requested Close Gripper Service")
+    ser = serial.Serial(_port, _baudrate)
+    command = 'P'
+    ser.write(command.encode())
+    data = ser.readline().decode('utf-8')
+    print(data)
+    return "Finished"
+
+def open_gripper(msg):
+    print("Requested Open Gripper Service")
+    ser = serial.Serial(_port, _baudrate)
+    command = 'D'
+    ser.write(command.encode())
+    data = ser.readline().decode('utf-8')
+    print(data)
+    return "Finished"
+
+
 def gripper_service():
     rospy.init_node('gripper_server', anonymous=True)
-    g = Gripper()
-    service = rospy.Service('gripper_srv', GripperSrv, g.request_handler)
+    rospy.Service('close_gripper', GripperSrv, close_gripper)
+    rospy.Service('open_gripper', GripperSrv, open_gripper)
     rospy.spin()
         
 
