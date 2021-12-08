@@ -198,7 +198,20 @@ class Jenga_Bot:
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
-        pass
+        hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.LEFT_HAND_FRAME, rospy.Time(0)))
+        distances = np.linspace(0, 0.375, 20)
+        for dist in distances:
+            # Move Backwards
+            move_backwards_trans = np.array([0, -1*dist, 0])
+            move_backwards_t = transformations.translation_matrix(move_backwards_trans)
+
+            hand_target_t = np.matmul(move_backwards_t, hand_t) #move backward
+            
+            self.frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+
+            hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
+            plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
+            self.execute_stick_movement(plan)
 
     # CLAW MOTIONS #
 
