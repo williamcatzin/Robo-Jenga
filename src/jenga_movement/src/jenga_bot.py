@@ -26,6 +26,10 @@ class Jenga_Bot:
         """ Return rough align frame (g) """
         pass
 
+    def get_claw_ready_frame(self):
+        """ Return calw ready frame (g) """
+        pass
+
     def get_stacking_frame(self):
         """ Return stacking frame (g), the location we start the stacking process at """
         pass
@@ -138,6 +142,11 @@ class Jenga_Bot:
 
     # STICK MOTIONS #
 
+    def plan_stick_rough_align(self):
+        """ Return plan to get stick camera pointed in right direction """
+
+        return self.plan_stick_movement(self.get_rough_align_frame())
+
     def plan_align_stick_to_tag(self):
         """ Return plan to align stick to tag """
 
@@ -216,6 +225,11 @@ class Jenga_Bot:
             return plan
 
     # CLAW MOTIONS #
+
+    def plan_claw_ready_position(self):
+        """ Return plan to move claw to ready position """
+
+        return self.plan_claw_movement(self.get_claw_ready_frame())
 
     def plan_align_claw_to_stick(self):
         """ Return plan to move claw to offset from stick to get ready to grab block """
