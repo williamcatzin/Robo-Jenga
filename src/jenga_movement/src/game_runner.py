@@ -4,31 +4,8 @@ from os import stat
 import sys
 import rospy
 from jenga_bot import Jenga_Bot
-from enum import Enum, auto
+from game_state import State
 
-class State(Enum):
-    START = auto()
-    SETUP = auto()
-    CALIBRATE = auto()
-    ROUGH_ALIGN = auto()
-    ALIGN_STICK = auto()
-    CLAW_READY = auto()
-    NEXT_BLOCK = auto()
-    ATTEMPT_PUSH = auto()
-    PUSH_ABORT = auto()
-    ALIGN_CLAW = auto()
-    RETRACT_STICK = auto()
-    GRAB_BLOCK = auto()
-    REMOVE_BOCK = auto()
-    MOVE_TO_STACK = auto()
-    PLACE_BOCK = auto()
-    FIX_BLOCK = auto()
-    SHUTDOWN = auto()
-    EXIT = auto()
-
-
-
-# fill this in with a state machine that creates a jenga_bot object and calls its methods according to user input
 
 def main(args):
     rospy.init_node('game_runner', anonymous=True)
