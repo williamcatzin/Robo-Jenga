@@ -34,7 +34,6 @@ def main(args):
             except:
                 print("Planning failed")
                 continue
-            print(plan)
             raw_input("Press <Enter> to execute stick path: ")
             try:
                 jenga_bot.execute_stick_movement(plan)
@@ -51,7 +50,6 @@ def main(args):
             except:
                 print("Planning failed")
                 continue
-            print(plan)
             raw_input("Press <Enter> to execute stick path: ")
             try:
                 jenga_bot.execute_stick_movement(plan)
@@ -70,11 +68,10 @@ def main(args):
             # move to next block ready position
             raw_input("Press <Enter> to plan stick path: ")
             try:
-                plan = jenga_bot.plan_move_stick_down_rows(6)
+                plan = jenga_bot.plan_move_to_next_row()
             except:
                 print("Planning failed")
                 continue
-            print(plan)
             raw_input("Press <Enter> to execute stick path: ")
             try:
                 jenga_bot.execute_stick_movement(plan)
@@ -94,12 +91,11 @@ def main(args):
             except:
                 print("Planning failed")
                 continue
-            print(plan)
             raw_input("Press <Enter> to execute stick path: ")
             try:
-                response = jenga_bot.execute_stick_movement(plan)
-                # TODO if execute_stick_movement returns abort
-                # transition to PUSH_ABORT state
+                # jenga_bot.execute_stick_movement(plan)
+                if not jenga_bot.execute_careful_push():
+                    state = State.PUSH_ABORT
             except:
                 print("Execution failed")
                 continue
@@ -117,7 +113,6 @@ def main(args):
             except:
                 print("Planning failed")
                 continue
-            print(plan)
             raw_input("Press <Enter> to execute claw path: ")
             try:
                 jenga_bot.execute_claw_movement(plan)
@@ -134,12 +129,13 @@ def main(args):
             except:
                 pass
             raw_input("Press <Enter> to execute claw path: ")
+            # jenga_bot.open_claw()
             try:
                 jenga_bot.execute_claw_movement(plan)
             except:
                 print("Execution failed")
                 continue
-            #jenga_bot.close_claw()
+            # jenga_bot.close_claw()
             state = State.REMOVE_BLOCK
         elif state == State.REMOVE_BLOCK:
             print("REMOVE_BLOCK\n")
@@ -186,7 +182,7 @@ def main(args):
             except:
                 print("Execution failed")
                 continue
-            
+            # jenga_bot.open_claw()
             #skip fixing block for now 
             r = raw_input("Try another block? (y/n): ")
             if r == "y":
