@@ -4,7 +4,7 @@ from os import stat
 import sys
 import rospy
 from jenga_bot import Jenga_Bot
-from enum import Enum
+from enum import Enum, auto
 
 class State(Enum):
     START = auto()
@@ -38,7 +38,7 @@ def main(args):
     while not rospy.is_shutdown():
         if state == State.START:
             # enter state machine
-            state = State.ROUGH_ALIGN #for now
+            state = State.ALIGN_STICK #for now
         elif state == State.SETUP:
             # do any setup neccessary
             pass
@@ -47,10 +47,30 @@ def main(args):
             pass
         elif state == State.ROUGH_ALIGN:
             # get to reliable starting position that can see tower (we may want to increase speed here)
-            pass
+            raw_input("Press <Enter> to plan stick path: ")
+            try:
+                plan = jenga_bot.plan_stick_rough_align()
+            except:
+                pass
+            raw_input("Press <Enter> to execute stick path: ")
+            try:
+                jenga_bot.execute_stick_movement(plan)
+            except:
+                pass
+            state = State.ALIGN_STICK
         elif state == State.ALIGN_STICK:
             # align stick to tower, query user for if align is successful, if successful, save position of tower for later use, else retry
-            pass
+            raw_input("Press <Enter> to plan stick path: ")
+            try:
+                plan = jenga_bot.plan_align_stick_to_tag()
+            except:
+                pass
+            raw_input("Press <Enter> to execute stick path: ")
+            try:
+                jenga_bot.execute_stick_movement(plan)
+            except:
+                pass
+            state = State.CLAW_READY
         elif state == State.CLAW_READY:
             # move claw to ready position
             pass
