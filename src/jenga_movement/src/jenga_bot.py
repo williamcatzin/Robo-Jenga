@@ -241,17 +241,8 @@ class Jenga_Bot:
 
         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
+        plan = self.plan_claw_movement(claw_target_t)
 
-        claw_to_right_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.CLAW_FRAME, self.RIGHT_HAND_FRAME, rospy.Time(0)))
-
-        right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
-
-        self.frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
-
-        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
-
-        plan = self.claw_planner.plan_to_pose(right_hand_target_pose, [])
         return plan
         
 
@@ -266,17 +257,8 @@ class Jenga_Bot:
 
         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
+        plan = self.plan_claw_movement(claw_target_t)
 
-        claw_to_right_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.CLAW_FRAME, self.RIGHT_HAND_FRAME, rospy.Time(0)))
-
-        right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
-
-        self.frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
-
-        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
-
-        plan = self.claw_planner.plan_to_pose(right_hand_target_pose, [])
         return plan
 
 
@@ -291,17 +273,8 @@ class Jenga_Bot:
 
         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
 
-        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
+        plan = self.plan_claw_movement(claw_target_t)
 
-        claw_to_right_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.CLAW_FRAME, self.RIGHT_HAND_FRAME, rospy.Time(0)))
-
-        right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
-
-        self.frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
-
-        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
-
-        plan = self.claw_planner.plan_to_pose(right_hand_target_pose, [])
         return plan
 
     def plan_move_up_to_stack(self):
