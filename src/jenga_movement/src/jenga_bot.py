@@ -48,7 +48,7 @@ class Jenga_Bot:
     def plan_stick_movement(self, stick_target_t):
         """Take target stick frame relative to base and return plan to move there"""
         # Publish to tf
-        self.frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", self.STICK_FRAME))
+        self.frame_pub.publish(helpers.g_to_tf(stick_target_t, "base", "stick_target"))
         # Get Homogenous Matrix g from tf info
         stick_to_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.STICK_FRAME, self.LEFT_HAND_FRAME, rospy.Time(0)))
         # Get desired end-effector configuration matrix
@@ -64,7 +64,7 @@ class Jenga_Bot:
     def plan_claw_movement(self, claw_target_t):
         """Take target claw frame relative to base and return plan to move there"""
         # Publish to tf
-        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", self.CLAW_FRAME))
+        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
         # Get Homogenous Matrix g from tf info
         claw_to_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.CLAW_FRAME, self.RIGHT_HAND_FRAME, rospy.Time(0)))
         # Get desired end-effector configuration matrix
@@ -249,7 +249,7 @@ class Jenga_Bot:
     def plan_claw_to_block(self):
         """ Return plan to move up to block to grab it """
         # .04 +z
-        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
         stick_to_claw_target_trans = np.array([0, 0, 0.04])
         stick_to_claw_target_rot = np.array([0, 0, 0, 0])
