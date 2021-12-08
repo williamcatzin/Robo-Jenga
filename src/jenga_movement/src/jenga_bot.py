@@ -32,7 +32,7 @@ class Jenga_Bot:
 
     def get_tag_align_transform(self):
         """ Return the transform (g) from tag to target """
-        tag_to_stick_target_trans = np.array([0, 0, 0])
+        tag_to_stick_target_trans = np.array([0, 0, -.005])
         tag_to_stick_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
         tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
         return tag_to_stick_target_t
@@ -125,7 +125,7 @@ class Jenga_Bot:
 
     def close_claw(self):
         """ Call service proxy to close claw """
-        
+
         rospy.wait_for_service('close_gripper')
         try:
             send_command = rospy.ServiceProxy('close_gripper', GripperSrv)
