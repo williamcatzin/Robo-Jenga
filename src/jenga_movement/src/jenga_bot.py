@@ -84,6 +84,8 @@ class Jenga_Bot:
         self.CLAW_FRAME = "grabby_claw"
         # Left Hand Frame
         self.LEFT_HAND_FRAME = 'left hand'
+        # Right Hand Frame
+        self.RIGHT_HAND_FRAME = 'right hand'
         # End-Effector Planners
         self.RIGHT_HAND_FRAME = 'right_hand'
         # Tag frame
@@ -211,13 +213,32 @@ class Jenga_Bot:
 
             hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
             plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
-            self.execute_stick_movement(plan)
+            return plan
 
     # CLAW MOTIONS #
 
     def plan_align_claw_to_stick(self):
         """ Return plan to move claw to offset from stick to get ready to grab block """
-        pass
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+
+        stick_to_claw_target_trans = np.array([0, 0, -0.065])
+        stick_to_claw_target_rot = np.array([1, 0, 0, 0])
+        stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
+
+        claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
+
+        self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
+
+        claw_to_right_hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform(self.CLAW_FRAME, self.RIGHT_HAND_FRAME, rospy.Time(0)))
+
+        right_hand_target_t = np.matmul(claw_target_t, claw_to_right_hand_t)     
+
+        self.frame_pub.publish(helpers.g_to_tf(right_hand_target_t, "base", "right_hand_target"))
+
+        right_hand_target_pose = helpers.g_to_pose(right_hand_target_t, "base")
+
+        plan = self.claw_planner.plan_to_pose(right_hand_target_pose, [])
+        
 
     def plan_block_grab(self):
         """ Return plan to move up to block to grab it """
