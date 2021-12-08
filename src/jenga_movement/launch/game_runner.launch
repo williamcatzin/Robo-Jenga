@@ -1,0 +1,9 @@
+<launch>
+  <!-- Mapper node. -->
+  <node name="game_runner"
+        pkg="jenga_movement"
+        type="game_runner.py"
+        output="screen"
+        args="">
+  </node>
+</launch>
