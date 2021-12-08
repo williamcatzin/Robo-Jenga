@@ -20,18 +20,18 @@ class Jenga_Bot:
         """ Load cell subscriber callback """
         pass
 
-    ### PUBLIC ###
-
-    def __init__(self):
-        """ Setup Jenga Bot object. Init subscriber, service proxy"""
-        pass
-
     def plan_stick_movement(self, g):
         """Take target stick frame relative to base and return plan to move there"""
         pass
 
     def plan_claw_movement(self, g):
         """Take target claw frame relative to base and return plan to move there"""
+        pass
+
+    ### PUBLIC ###
+
+    def __init__(self):
+        """ Setup Jenga Bot object. Init subscriber, service proxy"""
         pass
 
     def execute_stick_movement(self, plan):
