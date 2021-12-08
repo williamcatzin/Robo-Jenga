@@ -15,9 +15,9 @@ class State(Enum):
     ALIGN_CLAW = 10
     RETRACT_STICK = 11
     GRAB_BLOCK = 12
-    REMOVE_BOCK = 13
+    REMOVE_BLOCK = 13
     MOVE_TO_STACK = 14
-    PLACE_BOCK = 15
+    PLACE_BLOCK = 15
     FIX_BLOCK = 16
     SHUTDOWN = 17
     EXIT = 18
