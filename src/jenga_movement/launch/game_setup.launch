@@ -1,10 +1,16 @@
 <launch>
 
   <!-- enable baxter -->
+  <node name="enable_baxter" pkg="baxter_tools" type="enable_robot.py" args="-e"/>
   <!-- open cameras -->
+  <node name="left_cam_open" pkg="baxter_tools" type="camera_control.py" args="-o left_hand_camera"/>
+  <node name="right_cam_open" pkg="baxter_tools" type="camera_control.py" args="-o right_hand_camera"/>
   <!-- aruco launch -->
+  <include file="$(find ar_track_aruco)/launch/aruco_param.launch"/>
   <!-- run action server -->
+  <node name="action_server" pkg="baxter_interface" type="joint_trajectory_action_server.py"/>
   <!-- moveit launch -->
+  <include file="$(find baxter_moveit_config)/launch/demo_baxter.launch"/>
   <!-- peripheral launch -->
 
   <node name="tool_frame_publish1" pkg="tf" type="static_transform_publisher" args=".01 0 .185 0 0 0 left_hand pokey_stick 100"/>
