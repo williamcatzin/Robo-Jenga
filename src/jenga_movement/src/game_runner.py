@@ -83,6 +83,9 @@ def main(args):
                 continue
             state = State.ATTEMPT_PUSH
         elif state == State.ATTEMPT_PUSH:
+            # Call plan_push to get the plan to push the target block
+            # Then call execute_stick_movement to execute the plan
+            # If execute_stick_movement returns abort
             print("ATTEMPT_PUSH\n")
             # careful push
             raw_input("Press <Enter> to plan stick path: ")
@@ -94,7 +97,9 @@ def main(args):
             print(plan)
             raw_input("Press <Enter> to execute stick path: ")
             try:
-                jenga_bot.execute_stick_movement(plan)
+                response = jenga_bot.execute_stick_movement(plan)
+                # TODO if execute_stick_movement returns abort
+                # transition to PUSH_ABORT state
             except:
                 print("Execution failed")
                 continue

@@ -209,7 +209,7 @@ class Jenga_Bot:
 
             self.execute_stick_movement(plan)
             if self.FORCE > MAX_FORCE:
-                break
+                return "ABORT"
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
@@ -266,6 +266,9 @@ class Jenga_Bot:
     def plan_pull_pushed_block(self):
         """ Return plan to pull block out of tower """
         # -.04 -z
+        # Close gripper
+        self.close_claw()
+        # Retract Gripper
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
 
         stick_to_claw_target_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH - BLOCK_OFFSET)])
