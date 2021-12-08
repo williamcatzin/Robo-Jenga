@@ -7,4 +7,6 @@
   <node name="ar_track_left" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/left_hand_camera/image left_hand_camera 0.05"/>
   <node name="ar_track_right" pkg="ar_track_aruco" type="ar_track_aruco.py" output="screen" args="/cameras/right_hand_camera/image right_hand_camera 0.05"/>
 
+  <node name="lpf" pkg="ar_track_aruco" type="moving_avg_frame_filter.py" output="screen" args="base aruco_tag_0 aruco_tag_0_filtered 100"/>
+
 </launch>
