@@ -11,12 +11,11 @@
 
 import rospy
 import serial
-from gripper import Gripper
 from peripherals.srv import GripperSrv
 
 
 # Port name for serial port
-_port = '/dev/ttyUSB0'
+_port = '/dev/ttyUSB1'
 # baude rate of the esp32
 _baudrate = 9600
 
