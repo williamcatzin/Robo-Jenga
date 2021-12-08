@@ -52,6 +52,10 @@ class Jenga_Bot:
 
     # STICK MOTIONS #
 
+    def plan_align_stick_to_tag(self):
+        """ Return plan to align stick to tag """
+        pass
+
     def plan_move_down_rows(self, num_rows):
         """ Return plan to move stick down num_rows rows """
         pass
