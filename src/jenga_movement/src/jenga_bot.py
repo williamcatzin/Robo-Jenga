@@ -88,6 +88,8 @@ class Jenga_Bot:
         self.CLAW_FRAME = "grabby_claw"
         # Left Hand Frame
         self.LEFT_HAND_FRAME = 'left hand'
+        # Right Hand Frame
+        self.RIGHT_HAND_FRAME = 'right hand'
         # End-Effector Planners
         self.RIGHT_HAND_FRAME = 'right_hand'
         # Tag frame
@@ -220,7 +222,7 @@ class Jenga_Bot:
 
             hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
             plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
-            self.execute_stick_movement(plan)
+            return plan
 
     # CLAW MOTIONS #
 
@@ -231,15 +233,49 @@ class Jenga_Bot:
 
     def plan_align_claw_to_stick(self):
         """ Return plan to move claw to offset from stick to get ready to grab block """
-        pass
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
 
-    def plan_block_grab(self):
+        stick_to_claw_target_trans = np.array([0, 0, -0.105])
+        stick_to_claw_target_rot = np.array([1, 0, 0, 0])
+        stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
+
+        claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
+
+        plan = self.plan_claw_movement(claw_target_t)
+
+        return plan
+        
+
+    def plan_claw_to_block(self):
         """ Return plan to move up to block to grab it """
-        pass
+        # .04 +z
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+
+        stick_to_claw_target_trans = np.array([0, 0, 0.04])
+        stick_to_claw_target_rot = np.array([0, 0, 0, 0])
+        stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
+
+        claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
+
+        plan = self.plan_claw_movement(claw_target_t)
+
+        return plan
+
 
     def plan_pull_pushed_block(self):
         """ Return plan to pull block out of tower """
-        pass
+        # -.04 -z
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+
+        stick_to_claw_target_trans = np.array([0, 0, -0.04])
+        stick_to_claw_target_rot = np.array([0, 0, 0, 0])
+        stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
+
+        claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
+
+        plan = self.plan_claw_movement(claw_target_t)
+
+        return plan
 
     def plan_move_up_to_stack(self):
         """ Return plan to move up to height of stack """
