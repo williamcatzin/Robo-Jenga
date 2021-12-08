@@ -41,6 +41,8 @@ def main(args):
             pass
         elif state == 'ALIGN_CLAW':
             # align claw to pushed block (offset ready position)
+            plan = jenga_bot.plan_align_claw_to_stick()
+            jenga_bot.execute_claw_movement(plan)
             pass
         elif state == 'RETRACT_STICK':
             # pull stick out of tower
