@@ -15,7 +15,7 @@ BLOCK_WIDTH = .025
 BLOCK_LENGTH = .075
 BLOCK_OFFSET = .02
 
-CLAW_ALIGN_DIST = BLOCK_LENGTH + 0.03
+CLAW_ALIGN_DIST = BLOCK_LENGTH + 0.3
 CLAW_GRAB_DIST = .04
 CLAW_STACK_OFFSET = .05
 
@@ -50,7 +50,7 @@ class Jenga_Bot:
 
     def update_force_value(self, force):
         """ Load cell subscriber callback """
-        self.FORCE = force
+        self.FORCE = force.data
 
     def plan_stick_movement(self, stick_target_t):
         """Take target stick frame relative to base and return plan to move there"""
@@ -70,6 +70,7 @@ class Jenga_Bot:
 
     def plan_claw_movement(self, claw_target_t):
         """Take target claw frame relative to base and return plan to move there"""
+        print(claw_target_t)
         # Publish to tf
         self.frame_pub.publish(helpers.g_to_tf(claw_target_t, "base", "claw_target"))
         # Get Homogenous Matrix g from tf info
@@ -200,8 +201,9 @@ class Jenga_Bot:
         """ Plan full push motion to verify in RVIZ"""
 
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
+        self.backup_stick_t = stick_t
 
-        move_forward_trans = np.array([0, 0, .5 * BLOCK_LENGTH + BLOCK_OFFSET])
+        move_forward_trans = np.array([0, 0, .4 * BLOCK_LENGTH + BLOCK_OFFSET])
         move_forward_t = transformations.translation_matrix(move_forward_trans)
 
         stick_target_t = np.matmul(stick_t, move_forward_t) #move forward in hand frame
@@ -212,10 +214,12 @@ class Jenga_Bot:
 
     def execute_careful_push(self):
         """ Plan and execute careful push, checking force value along the way. Return bool for success"""
-        distances = np.linspace(0, .5 * BLOCK_LENGTH + BLOCK_OFFSET, 20)
+        print("runs")
+        distances = np.linspace(0, .4 * BLOCK_LENGTH + BLOCK_OFFSET, 20)
+        print(distances)
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
         for dist in distances:
-
+            print(dist)
             move_forward_trans = np.array([0, 0, dist])
             move_forward_t = transformations.translation_matrix(move_forward_trans)
 
@@ -223,20 +227,28 @@ class Jenga_Bot:
             
             plan = self.plan_stick_movement(stick_target_t)
 
+            print("plan calculated")
+
             self.execute_stick_movement(plan)
+
+            print("step executed")
+
+            print(self.FORCE)
             if self.FORCE > MAX_FORCE:
+                print("aborted bitch")
                 return False
+        print()
         return True
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
-        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
+        # stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        # Move Backwards
-        move_backwards_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH + BLOCK_OFFSET)])
-        move_backwards_t = transformations.translation_matrix(move_backwards_trans)
+        # # Move Backwards
+        # move_backwards_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH + BLOCK_OFFSET)])
+        # move_backwards_t = transformations.translation_matrix(move_backwards_trans)
 
-        stick_target_t = np.matmul(stick_t, move_backwards_t) #move backward
+        stick_target_t = self.backup_stick_t
         
         plan = self.plan_stick_movement(stick_target_t)
 

@@ -93,6 +93,7 @@ def main(args):
                 # jenga_bot.execute_stick_movement(plan)
                 if not jenga_bot.execute_careful_push():
                     state = State.PUSH_ABORT
+                    continue
             except:
                 print("Execution failed")
                 continue
@@ -100,7 +101,19 @@ def main(args):
         elif state == State.PUSH_ABORT:
             print("PUSH_ABORT\n")
             # handle case of block too hard to push
-            pass
+            raw_input("Press <Enter> to plan stick path: ")
+            try:
+                plan = jenga_bot.plan_stick_pull_back()
+            except:
+                print("Planning failed")
+                continue
+            raw_input("Press <Enter> to execute stick path: ")
+            try:
+                jenga_bot.execute_stick_movement(plan)
+            except:
+                print("Execution failed")
+                continue
+            state = State.NEXT_BLOCK
         elif state == State.ALIGN_CLAW:
             print("ALIGN_CLAW\n")
             # align claw to pushed block (offset ready position)
