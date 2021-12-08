@@ -152,7 +152,7 @@ class Jenga_Bot:
 
     def plan_push(self):
         """ Plan full push motion to verify in RVIZ"""
-        
+
         hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.LEFT_HAND_FRAME, rospy.Time(0)))
 
         move_forward_trans = np.array([0, 0, 0.375])
@@ -163,7 +163,8 @@ class Jenga_Bot:
         self.frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
 
         hand_target_pose = helpers.g_to_pose(hand_target_t)
-        plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
+        
+        self.stick_planner.plan_to_pose(hand_target_pose, [])
 
     def execute_careful_push(self):
         """ Plan and execute careful push, checking force value along the way. Return bool for success"""
