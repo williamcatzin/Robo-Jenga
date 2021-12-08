@@ -13,8 +13,14 @@ from std_msgs.msg import Float32
 BLOCK_HEIGHT = .015
 BLOCK_WIDTH = .025
 BLOCK_LENGTH = .075
+BLOCK_OFFSET = .02
+
+CLAW_ALIGN_DIST = BLOCK_LENGTH + 0.03
+CLAW_GRAB_DIST = .04
 
 MAX_FORCE = 1
+
+
 
 class Jenga_Bot:
     # Frames:
@@ -36,7 +42,7 @@ class Jenga_Bot:
 
     def get_tag_align_transform(self):
         """ Return the transform (g) from tag to target """
-        tag_to_stick_target_trans = np.array([0, 0, .01])
+        tag_to_stick_target_trans = np.array([0, 0, BLOCK_OFFSET])
         tag_to_stick_target_rot = np.array([0.7071068, 0.7071068, 0, 0])
         tag_to_stick_target_t = helpers.vec_to_g(tag_to_stick_target_trans, tag_to_stick_target_rot)
         return tag_to_stick_target_t
@@ -179,7 +185,7 @@ class Jenga_Bot:
 
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        move_forward_trans = np.array([0, 0, .5 * BLOCK_LENGTH])
+        move_forward_trans = np.array([0, 0, .5 * BLOCK_LENGTH + BLOCK_OFFSET])
         move_forward_t = transformations.translation_matrix(move_forward_trans)
 
         stick_target_t = np.matmul(stick_t, move_forward_t) #move forward in hand frame
@@ -190,37 +196,32 @@ class Jenga_Bot:
 
     def execute_careful_push(self):
         """ Plan and execute careful push, checking force value along the way. Return bool for success"""
-        distances = np.linspace(0, 0.375, 20)
-        hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.LEFT_HAND_FRAME, rospy.Time(0)))
+        distances = np.linspace(0, .5 * BLOCK_LENGTH + BLOCK_OFFSET, 20)
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
         for dist in distances:
 
             move_forward_trans = np.array([0, 0, dist])
             move_forward_t = transformations.translation_matrix(move_forward_trans)
 
-            hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
+            stick_target_t = np.matmul(stick_t, move_forward_t) #move forward in hand frame
             
-            self.frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+            plan = self.plan_stick_movement(stick_target_t)
 
-            hand_target_pose = helpers.g_to_pose(hand_target_t)
-            plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
             self.execute_stick_movement(plan)
             if self.FORCE > MAX_FORCE:
                 break
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
-        hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.LEFT_HAND_FRAME, rospy.Time(0)))
+        stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
         # Move Backwards
-        move_backwards_trans = np.array([0, 0, -.5 * BLOCK_LENGTH - .01])
+        move_backwards_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH + BLOCK_OFFSET)])
         move_backwards_t = transformations.translation_matrix(move_backwards_trans)
 
-        hand_target_t = np.matmul(hand_t, move_backwards_t) #move backward
+        stick_target_t = np.matmul(stick_t, move_backwards_t) #move backward
         
-        self.frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
-
-        hand_target_pose = helpers.g_to_pose(hand_target_t, "base")
-        plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
+        plan = self.plan_stick_movement(stick_target_t)
 
         return plan
 
@@ -235,7 +236,7 @@ class Jenga_Bot:
         """ Return plan to move claw to offset from stick to get ready to grab block """
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, -0.105])
+        stick_to_claw_target_trans = np.array([0, 0, -1 * CLAW_ALIGN_DIST])
         stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
@@ -251,8 +252,8 @@ class Jenga_Bot:
         # .04 +z
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, 0.04])
-        stick_to_claw_target_rot = np.array([0, 0, 0, 0])
+        stick_to_claw_target_trans = np.array([0, 0, -1 * CLAW_GRAB_DIST])
+        stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
@@ -267,8 +268,8 @@ class Jenga_Bot:
         # -.04 -z
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, -0.04])
-        stick_to_claw_target_rot = np.array([0, 0, 0, 0])
+        stick_to_claw_target_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH - BLOCK_OFFSET)])
+        stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
         claw_target_t = np.matmul(stick_t, stick_to_claw_target_t)
