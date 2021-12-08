@@ -17,6 +17,7 @@ BLOCK_OFFSET = .02
 
 CLAW_ALIGN_DIST = BLOCK_LENGTH + 0.03
 CLAW_GRAB_DIST = .04
+CLAW_STACK_OFFSET = .05
 
 MAX_FORCE = 1
 
@@ -110,11 +111,22 @@ class Jenga_Bot:
         # Publish to tf
         self.frame_pub = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=10)
 
+        self.offsets_to_next_row = [4, 2, 2, 2, 2, 2, 2]
+        self.rows_moved_to = 0
+        self.total_row_offset = -3
+        self.moving_down = False
+
     def execute_stick_movement(self, plan):
         """ Execute plan for stick movement """
     
         if not self.stick_planner.execute_plan(plan):
             raise Exception("Execution failed")
+
+        if self.moving_down:
+            self.moving_down = False
+            self.total_row_offset -= self.offsets_to_next_row[self.rows_moved_to]
+            self.rows_moved_to += 1
+            
 
     def execute_claw_movement(self, plan):
         """ Execute plan for claw movement """
@@ -180,6 +192,10 @@ class Jenga_Bot:
 
         return plan
 
+    def plan_move_to_next_row(self):
+        self.moving_down = True
+        return self.plan_move_stick_down_rows(self.offsets_to_next_row[self.rows_moved_to])
+
     def plan_push(self):
         """ Plan full push motion to verify in RVIZ"""
 
@@ -209,7 +225,8 @@ class Jenga_Bot:
 
             self.execute_stick_movement(plan)
             if self.FORCE > MAX_FORCE:
-                break
+                return False
+        return True
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
@@ -278,10 +295,26 @@ class Jenga_Bot:
 
         return plan
 
+
+    def plan_move_claw_up_dist(self, dist):
+        """ Return plan to move stick down num_rows rows """
+
+        # Get trans matrix from base to left hand and convert to homogenous mattrix
+        claw_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+        # Move down the Jenga tower by 0.015 mm down the y-axis
+        move_up_trans = np.array([0, 0, dist])
+        move_up_t = transformations.translation_matrix(move_up_trans)
+
+        claw_target_t = np.matmul(move_up_t, claw_t) #move down in spatial frame
+
+        plan = self.plan_claw_movement(claw_target_t)
+
+        return plan    
+
     def plan_move_up_to_stack(self):
         """ Return plan to move up to height of stack """
-        pass
+        return self.plan_move_claw_up_dist(self.total_row_offset * BLOCK_HEIGHT + CLAW_STACK_OFFSET)
 
     def plan_move_forward_to_stack(self):
         """ Return plan to move forward to stack """
-        pass
+        
