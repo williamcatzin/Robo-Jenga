@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from os import stat
 import sys
 import rospy
 from jenga_bot import Jenga_Bot
@@ -116,19 +117,46 @@ def main(args):
             state = State.REMOVE_BOCK
         elif state == State.MOVE_TO_STACK:
             # move claw up to top of tower
-            pass
+            raw_input("Press <Enter> to plan claw path: ")
+            try:
+                plan = jenga_bot.plan_move_up_to_stack()
+            except:
+                pass
+            raw_input("Press <Enter> to execute claw path: ")
+            try:
+                jenga_bot.execute_claw_movement(plan)
+            except:
+                pass
+            state = State.PLACE_BOCK
         elif state == State.PLACE_BOCK:
             # move to proper offset, open gripper
-            pass
+            raw_input("Press <Enter> to plan claw path: ")
+            try:
+                jenga_bot.plan_move_forward_to_stack()
+            except:
+                pass
+            raw_input("Press <Enter> to execute claw path: ")
+            try:
+                jenga_bot.execute_claw_movement(plan)
+            except:
+                pass
+            
+            #skip fixing block for now 
+            r = raw_input("Try another block? (y/n): ")
+            if r == "y":
+                state = State.CLAW_READY
+            else:
+                state = State.SHUTDOWN
+
         elif state == State.FIX_BLOCK:
             # move behind block, close gripper, push block forward
             pass
         elif state == State.SHUTDOWN:
             # wave goodbye
-            pass
+            state = State.EXIT
         elif state == State.EXIT:
             # exit program
-            pass
+            break
         else:
             print("Invalid state: \"{}\". Moving to EXIT.".format(str(state)))
             state = 'EXIT'
