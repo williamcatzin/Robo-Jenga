@@ -179,7 +179,22 @@ class Jenga_Bot:
 
     def execute_careful_push(self):
         """ Plan and execute careful push, checking force value along the way. Return bool for success"""
-        pass
+        distances = np.linspace(0, 0.375, 20)
+        hand_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.LEFT_HAND_FRAME, rospy.Time(0)))
+        for dist in distances:
+
+            move_forward_trans = np.array([0, 0, dist])
+            move_forward_t = transformations.translation_matrix(move_forward_trans)
+
+            hand_target_t = np.matmul(hand_t, move_forward_t) #move forward in hand frame
+            
+            self.frame_pub.publish(helpers.g_to_tf(hand_target_t, "base", "hand_target"))
+
+            hand_target_pose = helpers.g_to_pose(hand_target_t)
+            plan = self.stick_planner.plan_to_pose(hand_target_pose, [])
+            self.execute_stick_movement(plan)
+            if self.FORCE > MAX_FORCE:
+                break
 
     def plan_stick_pull_back(self):
         """ Return plan to move stick to ready position at current block level """
