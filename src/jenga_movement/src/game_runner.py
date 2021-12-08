@@ -96,7 +96,7 @@ def main(args):
             except:
                 print("Execution failed")
                 continue
-            state = State.RETRACT_STICK
+            state = State.ALIGN_CLAW
         elif state == State.PUSH_ABORT:
             print("PUSH_ABORT\n")
             # handle case of block too hard to push
