@@ -24,10 +24,15 @@ def main():
     ser.flushInput()
     ser.flushOutput()
     while not rospy.is_shutdown():
-        data = float(ser.readline().decode('utf-8'))
-        # Uncomment to print load cell data
-        print(data)
-        pub.publish(data)
+        try:
+            data = float(ser.readline().decode('utf-8'))
+            # Uncomment to print load cell data
+            print(data)
+            pub.publish(data)
+        except:
+            print("Handled error")
+            ser.flushInput()
+            ser.flushOutput()
         
 
 
