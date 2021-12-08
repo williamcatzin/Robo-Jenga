@@ -102,7 +102,7 @@ def main(args):
             # handle case of block too hard to push
             pass
         elif state == State.ALIGN_CLAW:
-            print("ALIGN_CLAW")
+            print("ALIGN_CLAW\n")
             # align claw to pushed block (offset ready position)
             raw_input("Press <Enter> to plan claw path: ")
             try:
