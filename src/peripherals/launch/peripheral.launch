@@ -1,6 +1,6 @@
 <launch>
 
   <!--Launch gripper server and start publishing load cell data-->
-  <node name="gripper_server" pkg="peripherals" type="gripper_server.py" output="screen">
-  <node name="load_cell" pkg="peripherals" type="push_peripheral.py" output="screen">
+  <node name="gripper_server" pkg="peripherals" type="gripper_server.py" output="screen"/>
+  <node name="load_cell" pkg="peripherals" type="push_peripheral.py" output="screen"/>
 </launch>
