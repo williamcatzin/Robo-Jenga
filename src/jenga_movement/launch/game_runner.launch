@@ -1,7 +1,7 @@
 <launch>
 
   <node name="tool_frame_publish1" pkg="tf" type="static_transform_publisher" args=".011 0 .17 0 0 0 left_hand pokey_stick 100"/>
-  <node name="tool_frame_publish2" pkg="tf" type="static_transform_publisher" args="-.017 .013 .1425 0 0 0 right_hand grabby_claw 100"/>
+  <node name="tool_frame_publish2" pkg="tf" type="static_transform_publisher" args="-.04 0 .1425 0 0 0 right_hand grabby_claw 100"/>
 
   <node name="game_runner"
         pkg="jenga_movement"
