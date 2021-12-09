@@ -265,7 +265,7 @@ class Jenga_Bot:
         """ Return plan to move claw to offset from stick to get ready to grab block """
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, -1 * CLAW_ALIGN_DIST])
+        stick_to_claw_target_trans = np.array([0, 0, CLAW_ALIGN_DIST])
         stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
@@ -281,7 +281,7 @@ class Jenga_Bot:
         # .04 +z
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.STICK_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, -1 * CLAW_GRAB_DIST])
+        stick_to_claw_target_trans = np.array([0, 0, CLAW_GRAB_DIST])
         stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
@@ -300,7 +300,7 @@ class Jenga_Bot:
         # Retract Gripper
         stick_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
 
-        stick_to_claw_target_trans = np.array([0, 0, -1 *(.5 * BLOCK_LENGTH - BLOCK_OFFSET)])
+        stick_to_claw_target_trans = np.array([0, 0, (.5 * BLOCK_LENGTH + BLOCK_OFFSET)])
         stick_to_claw_target_rot = np.array([1, 0, 0, 0])
         stick_to_claw_target_t = helpers.vec_to_g(stick_to_claw_target_trans, stick_to_claw_target_rot)
 
@@ -326,10 +326,26 @@ class Jenga_Bot:
 
         return plan    
 
+    def plan_move_claw_forward_dist(self, dist):
+        """ Return plan to move stick down num_rows rows """
+
+        # Get trans matrix from base to left hand and convert to homogenous mattrix
+        claw_t = helpers.tf_to_g(self.tfBuffer.lookup_transform("base", self.CLAW_FRAME, rospy.Time(0)))
+        # Move down the Jenga tower by 0.015 mm down the y-axis
+        move_forward_trans = np.array([0, 0, dist])
+        move_forward_t = transformations.translation_matrix(move_forward_trans)
+
+        claw_target_t = np.matmul(claw_t, move_forward_t) #move forward in claw frame
+
+        plan = self.plan_claw_movement(claw_target_t)
+
+        return plan    
+
     def plan_move_up_to_stack(self):
         """ Return plan to move up to height of stack """
         return self.plan_move_claw_up_dist(self.total_row_offset * BLOCK_HEIGHT + CLAW_STACK_OFFSET)
 
     def plan_move_forward_to_stack(self):
         """ Return plan to move forward to stack """
+        return self.plan_move_claw_forward_dist(BLOCK_LENGTH + BLOCK_OFFSET)
         

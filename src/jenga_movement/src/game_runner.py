@@ -138,7 +138,7 @@ def main(args):
             # open claw, move claw forward, close claw
             raw_input("Press <Enter> to plan claw path: ")
             try:
-                plan = jenga_bot.plan_block_grab()
+                plan = jenga_bot.plan_claw_to_block()
             except:
                 pass
             raw_input("Press <Enter> to execute claw path: ")
