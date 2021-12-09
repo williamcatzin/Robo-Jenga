@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 #The line above tells Linux that this file is a Python script,
 #and that the OS should use the Python interpreter in /usr/bin/env
@@ -25,8 +24,6 @@ def close_gripper(msg):
     ser = serial.Serial(_port, _baudrate)
     command = 'P'
     ser.write(command.encode())
-    data = ser.readline().decode('utf-8')
-    print(data)
     return "Finished"
 
 def open_gripper(msg):
@@ -34,8 +31,6 @@ def open_gripper(msg):
     ser = serial.Serial(_port, _baudrate)
     command = 'D'
     ser.write(command.encode())
-    data = ser.readline().decode('utf-8')
-    print(data)
     return "Finished"
 
 
