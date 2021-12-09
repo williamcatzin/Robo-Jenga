@@ -12,6 +12,6 @@
   <!-- moveit launch -->
   <include file="$(find baxter_moveit_config)/launch/demo_baxter.launch"/>
   <!-- peripheral launch -->
-  <include file="$(find peripherals)/launch/peripheral.launch"/>
+  <!-- <include file="$(find peripherals)/launch/peripheral.launch"/> -->
   
 </launch>
