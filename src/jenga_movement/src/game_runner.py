@@ -132,6 +132,21 @@ def main(args):
             except:
                 print("Execution failed")
                 continue
+            state = State.RETRACT_STICK
+        elif state == State.RETRACT_STICK:
+            print("RETRACT_STICK\n")
+            # pull stick out of tower
+            raw_input("Press <Enter> to plan stick path: ")
+            try:
+                plan = jenga_bot.plan_stick_pull_back()
+            except:
+                pass
+            raw_input("Press <Enter> to execute stick path: ")
+            try:
+                jenga_bot.execute_stick_movement(plan)
+            except:
+                print("Execution failed")
+                continue
             state = State.GRAB_BLOCK
         elif state == State.GRAB_BLOCK:
             print("GRAB_BLOCK\n")
@@ -142,13 +157,22 @@ def main(args):
             except:
                 pass
             raw_input("Press <Enter> to execute claw path: ")
-            # jenga_bot.open_claw()
+            
+            try:
+                jenga_bot.open_claw()
+            except:
+                print("Open failed")
+                continue
             try:
                 jenga_bot.execute_claw_movement(plan)
             except:
                 print("Execution failed")
                 continue
-            # jenga_bot.close_claw()
+            try:
+                jenga_bot.close_claw()
+            except:
+                print("Close failed")
+                continue
             state = State.REMOVE_BLOCK
         elif state == State.REMOVE_BLOCK:
             print("REMOVE_BLOCK\n")
@@ -186,7 +210,7 @@ def main(args):
             # move to proper offset, open gripper
             raw_input("Press <Enter> to plan claw path: ")
             try:
-                jenga_bot.plan_move_forward_to_stack()
+                plan = jenga_bot.plan_move_forward_to_stack()
             except:
                 pass
             raw_input("Press <Enter> to execute claw path: ")
@@ -195,28 +219,13 @@ def main(args):
             except:
                 print("Execution failed")
                 continue
-            # jenga_bot.open_claw()
+            jenga_bot.open_claw()
             #skip fixing block for now 
             r = raw_input("Try another block? (y/n): ")
             if r == "y":
-                state = State.RETRACT_STICK
+                state = State.CLAW_READY
             else:
                 state = State.SHUTDOWN
-        elif state == State.RETRACT_STICK:
-            print("RETRACT_STICK\n")
-            # pull stick out of tower
-            raw_input("Press <Enter> to plan stick path: ")
-            try:
-                plan = jenga_bot.plan_stick_pull_back()
-            except:
-                pass
-            raw_input("Press <Enter> to execute stick path: ")
-            try:
-                jenga_bot.execute_stick_movement(plan)
-            except:
-                print("Execution failed")
-                continue
-            state = State.CLAW_READY
         elif state == State.FIX_BLOCK:
             print("FIX_BLOCK\n")
             # move behind block, close gripper, push block forward
