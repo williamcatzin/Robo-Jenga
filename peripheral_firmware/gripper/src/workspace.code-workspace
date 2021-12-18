@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "servo_workspace",
+			"path": "../../../../../servo_workspace"
+		},
+		{
+			"name": "gripper",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
