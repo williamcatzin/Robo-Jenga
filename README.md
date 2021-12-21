@@ -6,4 +6,4 @@ EECS/ME 106A - Intro to Robotics
 
 We got the Rethink Robotics Baxter robot to play Jenga.
 
-https://sites.google.com/berkeley.edu/robojenga/design-implementation
+https://sites.google.com/berkeley.edu/robojenga/home
